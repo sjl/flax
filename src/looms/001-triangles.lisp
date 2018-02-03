@@ -22,7 +22,7 @@
 
 
 ;;;; Element Conversion -------------------------------------------------------
-(defun convert-triangles (triangle)
+(defun convert-triangle (triangle)
   (with-triangle (triangle)
     (flax.drawing:triangle a b c)))
 
