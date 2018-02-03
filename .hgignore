@@ -1,0 +1,5 @@
+syntax: glob
+lisp.prof
+*.pnm
+*.pgm
+scratch.lisp
