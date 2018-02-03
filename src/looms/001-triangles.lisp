@@ -22,9 +22,12 @@
 
 
 ;;;; Element Conversion -------------------------------------------------------
-(defun convert-to-drawing (triangle)
+(defun convert-triangles (triangle)
   (with-triangle (triangle)
     (flax.drawing:triangle a b c)))
+
+(defun convert (universe)
+  (mapcar #'convert-triangle universe))
 
 
 ;;;; Generation ---------------------------------------------------------------
@@ -92,9 +95,6 @@
 
 
 ;;;; Main ---------------------------------------------------------------------
-(defun convert (universe)
-  (mapcar #'convert-to-drawing universe))
-
 (defun loom (seed depth filename width height)
   (flax.drawing:render (convert (generate-universe-balancing depth seed))
                        filename width height))
