@@ -1,6 +1,15 @@
 (in-package :flax.looms.001-triangles)
 
+;;;; Triangle Subdivision
+;;;
+;;; Based on http://www.tylerlhobbs.com/writings/triangle-subdivision
 
+;;;; Utils --------------------------------------------------------------------
+(defun round-to (number divisor)
+  (* divisor (round number divisor)))
+
+
+;;;; Elements -----------------------------------------------------------------
 (defstruct (triangle (:conc-name ""))
   (a (coord 0 0) :type coord)
   (b (coord 0 0) :type coord)
@@ -12,8 +21,21 @@
   (make-triangle :a a :b b :c c))
 
 
-(defun round-to (number divisor)
-  (* divisor (round number divisor)))
+;;;; Element Conversion -------------------------------------------------------
+(defun convert-to-drawing (triangle)
+  (with-triangle (triangle)
+    (flax.drawing:triangle a b c)))
+
+
+;;;; Generation ---------------------------------------------------------------
+(defun initial-triangles ()
+  (list (triangle (coord 0 1)
+                  (coord 1 1)
+                  (coord 0 0))
+        (triangle (coord 1 0)
+                  (coord 1 1)
+                  (coord 0 0))))
+
 
 (defun split-triangle-evenly (triangle)
   (with-triangle (triangle)
@@ -22,6 +44,12 @@
                      (lerp (y b) (y c) n))))
       (list (triangle p b a)
             (triangle p a c)))))
+
+(defun generate-universe-even (depth &aux (triangles (initial-triangles)))
+  (do-repeat depth
+    (zapf triangles (mappend #'split-triangle-evenly %)))
+  triangles)
+
 
 (defun find-longest-side (triangle)
   (with-triangle (triangle)
@@ -35,7 +63,6 @@
         ((= longest ca) (list b c a))
         (t (error "what?"))))))
 
-
 (defun split-triangle-self-balancing (triangle)
   (destructuring-bind (a b c) (find-longest-side triangle)
     (let ((p (-<> (random-gaussian 0.5 0.1 #'rand)
@@ -44,23 +71,6 @@
                (clerp b c <>))))
       (list (triangle p b a)
             (triangle p a c)))))
-
-(defun convert-to-drawing (triangle)
-  (with-triangle (triangle)
-    (flax.drawing:triangle a b c)))
-
-(defun initial-triangles ()
-  (list (triangle (coord 0 1)
-                  (coord 1 1)
-                  (coord 0 0))
-        (triangle (coord 1 0)
-                  (coord 1 1)
-                  (coord 0 0))))
-
-(defun generate-universe-even (depth &aux (triangles (initial-triangles)))
-  (do-repeat depth
-    (zapf triangles (mappend #'split-triangle-evenly %)))
-  triangles)
 
 (defun generate-universe-balancing (depth seed)
   (losh::clear-gaussian-spare)
@@ -80,14 +90,13 @@
                         (split-triangle-self-balancing triangle)))))
         (map nil #'recur (initial-triangles))))))
 
-(defun render (universe filename width height)
-  (flax.drawing:render (mapcar #'convert-to-drawing universe)
-                       filename width height))
+
+;;;; Main ---------------------------------------------------------------------
+(defun convert (universe)
+  (mapcar #'convert-to-drawing universe))
 
 (defun loom (seed depth filename width height)
-  (render (generate-universe-balancing depth seed)
-          filename width height))
+  (flax.drawing:render (convert (generate-universe-balancing depth seed))
+                       filename width height))
 
-
-
-(time (loom nil 19 "out.pnm" 4000 4000))
+;; (time (loom nil 19 "out.pnm" 4000 4000))
