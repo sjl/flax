@@ -13,11 +13,18 @@
   (:use :cl :iterate :losh :flax.base :flax.quickutils
     :flax.coordinates)
   (:export
+    :with-rendering
     :render
     :triangle
-    :line))
+    :path))
+
 
 (defpackage :flax.looms.001-triangles
+  (:use :cl :iterate :losh :flax.base :flax.quickutils
+    :flax.coordinates)
+  (:export :loom))
+
+(defpackage :flax.looms.002-wobbly-lines
   (:use :cl :iterate :losh :flax.base :flax.quickutils
     :flax.coordinates)
   (:export :loom))
