@@ -22,5 +22,6 @@
                  (:file "drawing")
                  (:module "looms" :serial nil
                   :components
-                  ((:file "001-triangles")))))))
+                  ((:file "001-triangles")
+                   (:file "002-wobbly-lines")))))))
 

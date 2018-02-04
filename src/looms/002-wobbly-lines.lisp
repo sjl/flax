@@ -7,6 +7,7 @@
 
 (define-with-macro (line :conc-name "") points)
 
+
 ;;;; Element Conversion -------------------------------------------------------
 (defun convert (line total-ticks)
   (list (flax.drawing::path (coerce (points line) 'list)
@@ -19,6 +20,7 @@
     (iterate
       (for x :from 0.0 :to (+ 1.0 least-positive-single-float) :by (/ 1.0 segments))
       (collect (coord x 0.5) :result-type 'vector))))
+
 
 ;;;; Tick ---------------------------------------------------------------------
 (defun perturb-line (line)
