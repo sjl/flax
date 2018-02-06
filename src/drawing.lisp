@@ -180,9 +180,10 @@
 (defmacro with-rendering
     ((image-symbol filename width height &key (padding 0.03))
      &body body)
-  `(let ((,image-symbol (make-image ,width ,height))
-         (*padding* ,padding))
+  `(progn
      (sb-ext:gc :full t)
-     ,@body
-     (write-file ,image-symbol ,filename)
-     (values)))
+     (let ((,image-symbol (make-image ,width ,height))
+           (*padding* ,padding))
+       ,@body
+       (write-file ,image-symbol ,filename)
+       (values))))
