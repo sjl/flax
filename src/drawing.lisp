@@ -10,8 +10,9 @@
              value))
 
 (defmacro with-coordinates (image bindings &body body)
-  (with-gensyms (width height)
-    `(destructuring-bind (,width ,height) (array-dimensions ,image)
+  (with-gensyms (width height channels)
+    `(destructuring-bind (,height ,width ,channels) (array-dimensions ,image)
+       (declare (ignore ,channels))
        (let* ,(iterate (for (x-symbol y-symbol coord) :in bindings)
                        (for c = (gensym "coord"))
                        (appending
@@ -94,13 +95,13 @@
 
 ;;;; Glue ---------------------------------------------------------------------
 (deftype image ()
-  '(simple-array color (* *)))
-
-(deftype prepared-image ()
-  '(simple-array (simple-array (integer 0 255) (3)) (* *)))
+  '(simple-array (double-float 0.0d0 1.0d0) (* * 3)))
 
 (deftype index ()
   `(integer 0 (,array-dimension-limit)))
+
+(deftype row-buffer ()
+  '(simple-array (integer 0 255) (*)))
 
 
 (defun-inline normalize-alpha (alpha)
@@ -115,75 +116,97 @@
            (type index x y)
            (type (double-float 0.0d0 1.0d0) opacity)
            (type fixnum alpha))
-  (let ((pixel (aref image x y)))
-    (declare (type color pixel))
-    (blend! pixel color (* opacity (normalize-alpha alpha)))
+  (let ((pixel-alpha (* opacity (normalize-alpha alpha))))
+    (zapf (aref image y x 0) (lerp % (flax.colors::r color) pixel-alpha)
+          (aref image y x 1) (lerp % (flax.colors::g color) pixel-alpha)
+          (aref image y x 2) (lerp % (flax.colors::b color) pixel-alpha))
     (values)))
 
 
-(defun-inline prepare-channel (value)
+(defun-inline prepare-sample (value)
   (declare (optimize speed)
            (type (double-float 0.0d0 1.0d0) value))
   (round (* 255.0d0 value)))
 
-(defun-inline prepare-pixel (pixel)
+
+(defun make-image (width height color)
+  (let ((image (make-array (list height width 3)
+                 :element-type 'double-float
+                 :initial-element 1.0d0)))
+    (with-color (color r g b)
+      (lparallel:pdotimes (row height)
+        (dotimes (col width)
+          (setf (aref image row col 0) r
+                (aref image row col 1) g
+                (aref image row col 2) b))))
+    image))
+
+(defun fill-row (image row buffer)
   (declare (optimize speed)
-           (type color pixel))
-  (with-color (pixel r g b)
-    (list (prepare-channel r)
-          (prepare-channel g)
-          (prepare-channel b)
-          255)))
-
-
-(defun make-initialized-array (dimensions function &rest make-array-args)
-  (let ((result (apply #'make-array dimensions make-array-args)))
-    (do-array (v result)
-      (setf v (funcall function)))
-    result))
-
-(defun make-image (width height)
-  (make-initialized-array (list width height)
-                          (curry #'rgb 1 1 1)))
-
+           (type image image)
+           (type index row)
+           (type row-buffer buffer))
+  (iterate
+    (declare (iterate:declare-variables))
+    (with width = (length buffer))
+    (for (the fixnum i) :from (* row width))
+    (for (the fixnum j) :from 0 :below width)
+    (setf (aref buffer j)
+          (prepare-sample (row-major-aref image i)))))
 
 (defun write-file (image filename)
-  (destructuring-bind (width height) (array-dimensions image)
+  (destructuring-bind (height width channels) (array-dimensions image)
+    (declare (ignore channels))
     (let ((png (make-instance 'zpng:pixel-streamed-png
-                 :color-type :truecolor-alpha
+                 :color-type :truecolor
                  :width width
-                 :height height)))
+                 :height height))
+          (buffer (make-array (* width 3) :element-type '(integer 0 255))))
       (with-open-file (stream filename
                               :direction :output
                               :if-exists :supersede
                               :if-does-not-exist :create
                               :element-type '(unsigned-byte 8))
         (zpng:start-png png stream)
-        (dotimes (y height)
-          (dotimes (x width)
-            (zpng:write-pixel (prepare-pixel (aref image x y)) png)))
+        (dotimes (row height)
+          (fill-row image row buffer)
+          (zpng:write-row buffer png))
         (zpng:finish-png png)))))
 
 
-(defun blit (image object)
+(defun render-object (image object)
   (let ((state (aa:make-state)))
     (draw image state object)
-    (destructuring-bind (width height) (array-dimensions image)
+    (destructuring-bind (height width channels) (array-dimensions image)
+      (declare (ignore channels))
       (aa:cells-sweep/rectangle
         state 0 0 width height
         (curry #'put-pixel image (color object) (opacity object))))))
 
-
 (defun render (image objects)
-  (map nil (curry #'blit image) objects))
+  (map nil (curry #'render-object image) objects))
+
+(defun fade (image color alpha)
+  (declare (optimize speed)
+           (type image image)
+           (type color color)
+           (type (double-float 0.0d0 1.0d0) alpha))
+  (nest (with-color (color r g b))
+        (lparallel:pdotimes (row (array-dimension image 0)))
+        (dotimes (col (array-dimension image 1)))
+        (zapf (aref image row col 0) (lerp % r alpha)
+              (aref image row col 1) (lerp % g alpha)
+              (aref image row col 2) (lerp % b alpha))))
 
 (defmacro with-rendering
-    ((image-symbol filename width height &key (padding 0.03))
+    ((image-symbol filename width height &key
+                   (padding 0.03)
+                   (background '(rgb 1 1 1)))
      &body body)
   `(progn
      (sb-ext:gc :full t)
-     (let ((,image-symbol (make-image ,width ,height))
+     (let ((,image-symbol (make-image ,width ,height ,background))
            (*padding* ,padding))
-       ,@body
-       (write-file ,image-symbol ,filename)
-       (values))))
+       (prog1 ,@body
+         (write-file ,image-symbol ,filename)))))
+

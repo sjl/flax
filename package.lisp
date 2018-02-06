@@ -14,7 +14,6 @@
   (:export
     :color
     :with-color
-    :blend!
     :hsv
     :rgb))
 
@@ -25,6 +24,7 @@
   (:export
     :with-rendering
     :render
+    :fade
     :triangle
     :path))
 

@@ -4,6 +4,8 @@
 (defvar *brush* nil)
 (defvar *hue* nil)
 (defvar *hue-increment* nil)
+(defparameter *swing* 0.03)
+(defparameter *background* (hsv 0 0 0.05))
 
 
 ;;;; Elements -----------------------------------------------------------------
@@ -15,10 +17,10 @@
 
 
 ;;;; Element Conversion -------------------------------------------------------
-(defun convert (line total-ticks)
+(defun convert (line opacity)
   (list (flax.drawing::path (coerce (points line) 'list)
-                            :color (hsv *hue* 1 1)
-                            :opacity (/ 95.0d0 total-ticks))))
+                            :color (hsv *hue* 0.9 1)
+                            :opacity opacity)))
 
 
 ;;;; Generation ---------------------------------------------------------------
@@ -30,10 +32,11 @@
 
 
 ;;;; Tick ---------------------------------------------------------------------
+(defun perturb-point (point)
+  (incf (y point) (random-range-inclusive (- *swing*) *swing* #'rand)))
+
 (defun perturb-line (line)
-  (map nil (lambda (c)
-             (incf (y c) (random-range-inclusive -0.025 0.025 #'rand)))
-       (points line)))
+  (map nil #'perturb-point (points line)))
 
 (defun smooth-line (line)
   (iterate
@@ -54,15 +57,23 @@
 ;;;; Main ---------------------------------------------------------------------
 (defun loom (seed ticks filename width height)
   (with-seed seed
-    (flax.drawing:with-rendering (image filename width height :padding 0.0)
+    (flax.drawing:with-rendering (image filename width height
+                                  :padding 0.0
+                                  :background *background*)
       (let ((line (initial 300))
             (*hue* (random-range 0.0d0 1.0d0 #'rand))
-            (*hue-increment* (/ (random-range 0.15d0 0.3d0 #'rand) ticks)))
+            (*hue-increment* (/ (random-range 0.15d0 0.3d0 #'rand) ticks))
+            (mode (random-elt '(:opaque :transparent :fade) #'rand)))
         (dotimes (tick ticks)
           (when (dividesp tick (/ (expt 10 (floor (log (1- ticks) 10))) 2))
             (print tick))
-          (flax.drawing:render image (convert line ticks))
-          (tick line))))))
+          (when (and (eq mode :fade) (dividesp tick 10))
+            (flax.drawing:fade image *background* 0.04d0))
+          (flax.drawing:render image (convert line (if (eq mode :transparent)
+                                                     (/ 95.0d0 ticks)
+                                                     1.0d0)))
+          (tick line))
+        mode))))
 
 
-;; (time (loom nil 1000 "out.png" 3000 500))
+;; (time (loom nil 2000 "out.png" 3000 500))

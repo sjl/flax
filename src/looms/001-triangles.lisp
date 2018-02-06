@@ -100,4 +100,4 @@
     (flax.drawing:render image (convert (generate-universe-balancing depth seed)))))
 
 
-;; (time (loom 19 15 "out.png" 1000 1000))
+;; (time (loom nil 18 "out.png" 3000 3000))
