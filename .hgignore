@@ -3,3 +3,4 @@ lisp.prof
 *.pnm
 *.pgm
 scratch.lisp
+*.png

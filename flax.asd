@@ -8,7 +8,7 @@
                :cl-vectors
                :iterate
                :losh
-               :trivial-ppm)
+               :zpng)
 
   :serial t
   :components ((:module "vendor" :serial t
@@ -19,6 +19,7 @@
                 :components
                 ((:file "base")
                  (:file "coordinates")
+                 (:file "colors")
                  (:file "drawing")
                  (:module "looms" :serial nil
                   :components
