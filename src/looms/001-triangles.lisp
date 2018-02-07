@@ -4,6 +4,7 @@
 ;;;
 ;;; Based on http://www.tylerlhobbs.com/writings/triangle-subdivision
 
+
 ;;;; Utils --------------------------------------------------------------------
 (defun round-to (number divisor)
   (* divisor (round number divisor)))
@@ -100,4 +101,4 @@
     (flax.drawing:render image (convert (generate-universe-balancing depth seed)))))
 
 
-;; (time (loom nil 18 "out.png" 3000 3000))
+;; (time (loom 45 16 "out.png" 2000 2000))

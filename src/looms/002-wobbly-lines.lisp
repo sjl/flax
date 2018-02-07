@@ -76,4 +76,4 @@
         mode))))
 
 
-;; (time (loom nil 2000 "out.png" 3000 500))
+;; (time (loom nil 1000 "out.png" 800 300))
