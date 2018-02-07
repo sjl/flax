@@ -2,7 +2,7 @@
 ;;;; See http://quickutil.org for details.
 
 ;;;; To regenerate:
-;;;; (qtlc:save-utils-as "quickutils.lisp" :utilities '(:COMPOSE :CURRY :MAPPEND :ONCE-ONLY :RCURRY :SYMB :WITH-GENSYMS) :ensure-package T :package "FLAX.QUICKUTILS")
+;;;; (qtlc:save-utils-as "quickutils.lisp" :utilities '(:ALIST-HASH-TABLE :COMPOSE :CURRY :ENSURE-LIST :MAPPEND :ONCE-ONLY :RCURRY :SYMB :WITH-GENSYMS) :ensure-package T :package "FLAX.QUICKUTILS")
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (unless (find-package "FLAX.QUICKUTILS")
@@ -13,10 +13,20 @@
 (in-package "FLAX.QUICKUTILS")
 
 (when (boundp '*utilities*)
-  (setf *utilities* (union *utilities* '(:MAKE-GENSYM-LIST :ENSURE-FUNCTION
-                                         :COMPOSE :CURRY :MAPPEND :ONCE-ONLY
+  (setf *utilities* (union *utilities* '(:ALIST-HASH-TABLE :MAKE-GENSYM-LIST
+                                         :ENSURE-FUNCTION :COMPOSE :CURRY
+                                         :ENSURE-LIST :MAPPEND :ONCE-ONLY
                                          :RCURRY :MKSTR :SYMB
                                          :STRING-DESIGNATOR :WITH-GENSYMS))))
+
+  (defun alist-hash-table (alist &rest hash-table-initargs)
+    "Returns a hash table containing the keys and values of the association list
+`alist`. Hash table is initialized using the `hash-table-initargs`."
+    (let ((table (apply #'make-hash-table hash-table-initargs)))
+      (dolist (cons alist)
+        (setf (gethash (car cons) table) (cdr cons)))
+      table))
+  
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun make-gensym-list (length &optional (x "G"))
     "Returns a list of `length` gensyms, each generated as if with a call to `make-gensym`,
@@ -88,6 +98,13 @@ it is called with to `function`."
          (declare (optimize (speed 3) (safety 1) (debug 1)))
          (lambda (&rest more)
            (apply ,fun ,@curries more)))))
+  
+
+  (defun ensure-list (list)
+    "If `list` is a list, it is returned. Otherwise returns the list designated by `list`."
+    (if (listp list)
+        list
+        (list list)))
   
 
   (defun mappend (function &rest lists)
@@ -207,7 +224,7 @@ unique symbol the named variable will be bound to."
     `(with-gensyms ,names ,@forms))
   
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  (export '(compose curry mappend once-only rcurry symb with-gensyms
-            with-unique-names)))
+  (export '(alist-hash-table compose curry ensure-list mappend once-only rcurry
+            symb with-gensyms with-unique-names)))
 
 ;;;; END OF quickutils.lisp ;;;;

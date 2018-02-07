@@ -93,6 +93,42 @@
       (vectors:update-state state <>))))
 
 
+;;;; Rectangles ---------------------------------------------------------------
+(defclass rectangle (drawable)
+  ((a :type coord :accessor a :initarg :a)
+   (b :type coord :accessor b :initarg :b)
+   (round-corners :type (or null integer)
+                  :accessor round-corners
+                  :initarg :round-corners)))
+
+(defun rectangle (a b &key (opacity 1.0d0) (color *black*) round-corners)
+  (make-instance 'rectangle :a a :b b
+    :color color
+    :opacity opacity
+    :round-corners round-corners))
+
+(defmethod print-object ((o rectangle) s)
+  (print-unreadable-object (o s :type t :identity nil)
+    (format s "(~D, ~D) (~D, ~D)"
+            (x (a o))
+            (y (a o))
+            (x (b o))
+            (y (b o)))))
+
+(defmethod draw (image state (rect rectangle))
+  (with-coordinates image
+      ((ax ay (a rect))
+       (bx by (b rect)))
+    (-<> (paths:make-rectangle-path ax ay bx by
+                                    :round (* (round-corners rect)
+                                              (* (- 1.0 *padding* *padding*)
+                                                 (min (array-dimension image 0)
+                                                      (array-dimension image 1)))))
+      ;; paths:make-simple-path
+      ;; (paths:stroke-path <> 1)
+      (vectors:update-state state <>))))
+
+
 ;;;; Glue ---------------------------------------------------------------------
 (deftype image ()
   '(simple-array (double-float 0.0d0 1.0d0) (* * 3)))

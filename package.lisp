@@ -26,7 +26,8 @@
     :render
     :fade
     :triangle
-    :path))
+    :path
+    :rectangle))
 
 (defpackage :flax.looms.001-triangles
   (:use :cl :iterate :losh :flax.base :flax.quickutils
@@ -34,6 +35,12 @@
   (:export :loom))
 
 (defpackage :flax.looms.002-wobbly-lines
+  (:use :cl :iterate :losh :flax.base :flax.quickutils
+    :flax.colors
+    :flax.coordinates)
+  (:export :loom))
+
+(defpackage :flax.looms.003-basic-l-systems
   (:use :cl :iterate :losh :flax.base :flax.quickutils
     :flax.colors
     :flax.coordinates)

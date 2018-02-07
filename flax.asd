@@ -24,5 +24,6 @@
                  (:module "looms" :serial nil
                   :components
                   ((:file "001-triangles")
-                   (:file "002-wobbly-lines")))))))
+                   (:file "002-wobbly-lines")
+                   (:file "003-basic-l-systems")))))))
 

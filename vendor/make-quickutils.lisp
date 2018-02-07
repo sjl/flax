@@ -4,8 +4,10 @@
   "quickutils.lisp"
   :utilities '(
 
+               :alist-hash-table
                :compose
                :curry
+               :ensure-list
                :mappend
                :once-only
                :rcurry
