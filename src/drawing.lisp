@@ -134,7 +134,7 @@
                  :element-type 'double-float
                  :initial-element 1.0d0)))
     (with-color (color r g b)
-      (lparallel:pdotimes (row height)
+      (dotimes (row height)
         (dotimes (col width)
           (setf (aref image row col 0) r
                 (aref image row col 1) g
@@ -192,7 +192,7 @@
            (type color color)
            (type (double-float 0.0d0 1.0d0) alpha))
   (nest (with-color (color r g b))
-        (lparallel:pdotimes (row (array-dimension image 0)))
+        (dotimes (row (array-dimension image 0)))
         (dotimes (col (array-dimension image 1)))
         (zapf (aref image row col 0) (lerp % r alpha)
               (aref image row col 1) (lerp % g alpha)

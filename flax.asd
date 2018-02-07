@@ -8,7 +8,6 @@
                :cl-vectors
                :iterate
                :losh
-               :lparallel
                :zpng)
 
   :serial t

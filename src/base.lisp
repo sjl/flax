@@ -1,7 +1,5 @@
 (in-package :flax.base)
 
-(setf lparallel:*kernel* (lparallel:make-kernel 1))
-
 (defun rand (bound)
   (pcg:pcg-random t bound))
 
