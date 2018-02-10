@@ -14,8 +14,8 @@
                                 (ensure-list word))
                           (finally (return result)))))
 
-(defun run-lsystem (lsystem iterations mutate callback)
-  (recursively ((word (axiom lsystem))
+(defun run-lsystem (lsystem axiom iterations mutate callback)
+  (recursively ((word (or axiom (axiom lsystem)))
                 (iteration 0))
     (when callback
       (funcall callback iteration word))
@@ -28,8 +28,8 @@
   (let ((var (symb '* name '*)))
     `(progn
        (defparameter ,var (make-lsystem ',axiom ',productions))
-       (defun ,name (iterations &key mutate callback)
-         (run-lsystem ,var iterations mutate callback)))))
+       (defun ,name (iterations &key mutate callback axiom)
+         (run-lsystem ,var axiom iterations mutate callback)))))
 
 
 (define-lsystem anabaena-catenula ar
@@ -93,11 +93,16 @@
 
 
 ;;;; Main ---------------------------------------------------------------------
+(defun random-anabaena-catenula-axiom (length)
+  (gimme length (random-elt '(ar al br bl) #'rand)))
+
 (defun loom-anabaena-catenula (seed filename width height)
   (with-seed seed
     (flax.drawing:with-rendering
         (image filename width height :background *background*)
       (anabaena-catenula (maximum-words)
+                         :axiom (random-anabaena-catenula-axiom
+                                  (random-range-inclusive 1 6 #'rand))
                          :mutate #'cull
                          :callback (lambda (iteration word)
                                      (flax.drawing:render image (convert word iteration)))))))
