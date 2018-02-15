@@ -25,5 +25,6 @@
                   :components
                   ((:file "001-triangles")
                    (:file "002-wobbly-lines")
-                   (:file "003-basic-l-systems")))))))
+                   (:file "003-basic-l-systems")
+                   (:file "004-turtle-curves")))))))
 

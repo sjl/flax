@@ -27,7 +27,9 @@
     :fade
     :triangle
     :path
+    :points
     :rectangle))
+
 
 (defpackage :flax.looms.001-triangles
   (:use :cl :iterate :losh :flax.base :flax.quickutils
@@ -41,6 +43,12 @@
   (:export :loom))
 
 (defpackage :flax.looms.003-basic-l-systems
+  (:use :cl :iterate :losh :flax.base :flax.quickutils
+    :flax.colors
+    :flax.coordinates)
+  (:export :loom))
+
+(defpackage :flax.looms.004-turtle-curves
   (:use :cl :iterate :losh :flax.base :flax.quickutils
     :flax.colors
     :flax.coordinates)
