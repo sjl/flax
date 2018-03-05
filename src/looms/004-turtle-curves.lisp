@@ -211,18 +211,14 @@
 
 
 (defun mutation-transpose (result)
-  (pr 'transposing result)
   (rotatef (elt result (rand (length result)))
            (elt result (rand (length result))))
-  (pr '----------> result)
   result)
 
 (defun mutation-insert (result)
-  (pr 'inserting result)
   (zapf result (insert (random-elt result #'rand)
                        %
                        (rand (length result))))
-  (pr '--------> result)
   result)
 
 (defun mutate-production (result)
