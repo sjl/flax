@@ -4,11 +4,16 @@
   :author "Steve Losh <steve@stevelosh.com>"
   :license "MIT"
 
-  :depends-on (:cl-pcg
+  :depends-on (
+
+               :cl-pcg
+               :cl-svg
                :cl-vectors
                :iterate
                :losh
-               :zpng)
+               :zpng
+
+               )
 
   :serial t
   :components ((:module "vendor" :serial t
