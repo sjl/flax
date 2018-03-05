@@ -260,7 +260,7 @@
                 (,*tree-f* 4 7 ,(- 1/4tau)))
               #'rand))
 
-(defun loom (seed filename width height
+(defun loom (seed filename filetype width height
              &optional l-system iterations starting-angle)
   (nest
     (with-seed seed)
@@ -269,7 +269,7 @@
         (if l-system
           (list l-system iterations iterations starting-angle)
           (select-l-system)))
-    (let* ((*starting-angle* (or starting-angle (rand tau)))
+    (let* ((*starting-angle* (or (or starting-angle (rand tau))))
            (bg (hsv (rand 1.0) (rand 1.0) (random-range 0.0 0.2 #'rand)))
            (*color* (hsv (rand 1.0)
                          (random-range 0.5 0.8 #'rand)
@@ -287,15 +287,14 @@
                               (mutate-productions <>))
                             <>)))
            (*angle* (l-system-recommended-angle l-system))))
-    (flax.drawing:with-rendering (image filename width height :background bg))
+    (flax.drawing:with-rendering
+        (canvas filetype filename width height :background bg))
     (progn (-<> (run-l-system axiom productions iterations)
              (turtle-draw <>)
-             (flax.drawing:render image <>))
+             (flax.drawing:render canvas <>))
            (list (l-system-name l-system)
                  iterations
                  (if should-mutate mutation-seed nil)))))
 
 
-
-;; (time (loom nil "out.png" 1000 1000 *tree-f* 7 (- 1/4tau)))
-;; (time (loom nil "out.png" 1000 1000))
+;; (time (loom (pr (random (expt 2 31))) "out" :svg 1000 1000))

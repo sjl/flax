@@ -96,9 +96,9 @@
 
 
 ;;;; Main ---------------------------------------------------------------------
-(defun loom (seed depth filename width height)
-  (flax.drawing:with-rendering (image filename width height)
-    (flax.drawing:render image (convert (generate-universe-balancing depth seed)))))
+(defun loom (seed depth filename filetype width height)
+  (flax.drawing:with-rendering (canvas filetype filename width height)
+    (flax.drawing:render canvas (convert (generate-universe-balancing depth seed)))))
 
 
-;; (time (loom 45 16 "out.png" 2000 2000))
+;; (time (loom 1964055800 17 "out" :png 1000 1000))

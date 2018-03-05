@@ -20,7 +20,10 @@
                 ((:file "base")
                  (:file "coordinates")
                  (:file "colors")
-                 (:file "drawing")
+                 (:module "drawing" :serial t
+                  :components ((:file "api")
+                               (:file "png")
+                               (:file "svg")))
                  (:module "looms" :serial nil
                   :components
                   ((:file "001-triangles")
