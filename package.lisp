@@ -7,7 +7,8 @@
   (:export
     :coord :x :y
     :distance
-    :clerp))
+    :clerp
+    :coord-to-cons))
 
 (defpackage :flax.colors
   (:use :cl :iterate :losh :flax.base :flax.quickutils)
@@ -28,7 +29,8 @@
     :triangle
     :path
     :points
-    :rectangle))
+    :rectangle
+    :circle))
 
 
 (defpackage :flax.looms.001-triangles
@@ -49,6 +51,12 @@
   (:export :loom))
 
 (defpackage :flax.looms.004-turtle-curves
+  (:use :cl :iterate :losh :flax.base :flax.quickutils
+    :flax.colors
+    :flax.coordinates)
+  (:export :loom))
+
+(defpackage :flax.looms.005-simple-triangulations
   (:use :cl :iterate :losh :flax.base :flax.quickutils
     :flax.colors
     :flax.coordinates)

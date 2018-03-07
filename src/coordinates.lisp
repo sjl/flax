@@ -16,3 +16,6 @@
 (defun clerp (from to n)
   (coord (lerp (x from) (x to) n)
          (lerp (y from) (y to) n)))
+
+(defun coord-to-cons (c)
+  (cons (x c) (y c)))

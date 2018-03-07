@@ -57,12 +57,18 @@
 (defmethod draw ((canvas png-canvas) (rect rectangle))
   (with-coordinates canvas
       ((ax ay (a rect))
-       (bx by (b rect)))
-    (-<> (paths:make-rectangle-path
-           ax ay bx by
-           :round (compute-corner-rounding canvas rect))
-      ;; paths:make-simple-path
-      ;; (paths:stroke-path <> 1)
+       (bx by (b rect))
+       (r (round-corners rect)))
+    (-<> (paths:make-rectangle-path ax ay bx by :round r)
+      (vectors:update-state (state canvas) <>))))
+
+
+;;;; Circles ------------------------------------------------------------------
+(defmethod draw ((canvas png-canvas) (circ circle))
+  (with-coordinates canvas
+      ((x y (center circ))
+       (r (radius circ)))
+    (-<> (paths:make-circle-path x y r)
       (vectors:update-state (state canvas) <>))))
 
 

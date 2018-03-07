@@ -6,6 +6,7 @@
 
   :depends-on (
 
+               :sb-cga ; for lofi-tri only
                :cl-pcg
                :cl-svg
                :cl-vectors
@@ -16,23 +17,27 @@
                )
 
   :serial t
-  :components ((:module "vendor" :serial t
-                :components ((:file "quickutils-package")
-                             (:file "quickutils")))
-               (:file "package")
-               (:module "src" :serial t
-                :components
-                ((:file "base")
-                 (:file "coordinates")
-                 (:file "colors")
-                 (:module "drawing" :serial t
-                  :components ((:file "api")
-                               (:file "png")
-                               (:file "svg")))
-                 (:module "looms" :serial nil
-                  :components
-                  ((:file "001-triangles")
-                   (:file "002-wobbly-lines")
-                   (:file "003-basic-l-systems")
-                   (:file "004-turtle-curves")))))))
+  :components
+  ((:module "vendor" :serial t
+    :components ((:file "quickutils-package")
+                 (:file "quickutils")
+                 (:module "lofi-tri"
+                  :components ((:file "lofi.tri")))))
+   (:file "package")
+   (:module "src" :serial t
+    :components
+    ((:file "base")
+     (:file "coordinates")
+     (:file "colors")
+     (:module "drawing" :serial t
+      :components ((:file "api")
+                   (:file "png")
+                   (:file "svg")))
+     (:module "looms" :serial nil
+      :components
+      ((:file "001-triangles")
+       (:file "002-wobbly-lines")
+       (:file "003-basic-l-systems")
+       (:file "004-turtle-curves")
+       (:file "005-simple-triangulations")))))))
 

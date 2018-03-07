@@ -21,16 +21,30 @@
              0 dimension
              value))
 
+(defun convert-magnitude (canvas magnitude)
+  (let ((dim (min (height canvas) (width canvas))))
+    (lerp 0 (- dim (* 2 *padding* dim)) magnitude)))
+
+
 (defmacro with-coordinates (canvas bindings &body body)
-  (with-gensyms (width height)
-    `(with-canvas (,canvas ,width ,height)
-       (let* ,(iterate (for (x-symbol y-symbol coord) :in bindings)
-                       (for c = (gensym "coord"))
-                       (appending
-                         (list `(,c ,coord)
-                               `(,x-symbol (convert-coord (x ,c) ,width))
-                               `(,y-symbol (convert-coord (y ,c) ,height)))))
-         ,@body))))
+  (once-only (canvas)
+    (with-gensyms (width height)
+      (labels ((parse-coord-binding (binding)
+                 (with-gensyms (coord)
+                   (destructuring-bind (x-symbol y-symbol value) binding
+                     `((,coord ,value)
+                       (,x-symbol (convert-coord (x ,coord) ,width))
+                       (,y-symbol (convert-coord (y ,coord) ,height))))))
+               (parse-magnitude-binding (binding)
+                 (destructuring-bind (magnitude-symbol value) binding
+                   `((,magnitude-symbol (convert-magnitude ,canvas ,value)))))
+               (parse-binding (binding)
+                 (ecase (length binding)
+                   (2 (parse-magnitude-binding binding))
+                   (3 (parse-coord-binding binding)))))
+        `(with-canvas (,canvas ,width ,height)
+           (let* ,(mapcan #'parse-binding bindings)
+             ,@body))))))
 
 
 (defun coord-to-string (c)
@@ -91,7 +105,7 @@
 (defclass* (rectangle :conc-name "") (drawable)
   ((a :type coord)
    (b :type coord)
-   (round-corners :type (or null integer))))
+   (round-corners :type float :initform 0.0)))
 
 (defun rectangle (a b &key (opacity 1.0d0) (color *black*) round-corners)
   (make-instance 'rectangle :a a :b b
@@ -114,6 +128,24 @@
          (* (- 1.0 *padding* *padding*)
             (min height width))))
     0))
+
+
+;;;; Circles ------------------------------------------------------------------
+(defclass* (circle :conc-name "") (drawable)
+  ((center :type coord)
+   (radius :type single-float)))
+
+(defun circle (center radius &key (opacity 1.0d0) (color *black*))
+  (make-instance 'circle :center center :radius radius
+    :color color
+    :opacity (coerce opacity 'double-float)))
+
+(defmethod print-object ((o circle) s)
+  (print-unreadable-object (o s :type t :identity nil)
+    (format s "(~D, ~D) radius ~D"
+            (x (center o))
+            (y (center o))
+            (radius o))))
 
 
 ;;;; Rendering ----------------------------------------------------------------

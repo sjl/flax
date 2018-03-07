@@ -107,4 +107,4 @@
                          :callback (lambda (iteration word)
                                      (flax.drawing:render canvas (convert word iteration)))))))
 
-;; (time (loom-anabaena-catenula nil "out" :svg 2000 2000))
+;; (time (loom-anabaena-catenula nil "out" :png 2000 2000))

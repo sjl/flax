@@ -28,17 +28,27 @@
 (defmethod draw ((canvas svg-canvas) (rect rectangle))
   (with-coordinates canvas
       ((ax ay (a rect))
-       (bx by (b rect)))
-    (let ((rounding (compute-corner-rounding canvas rect)))
-      (svg:draw (scene canvas) (:rect
-                                :x (min ax bx)
-                                :y (min ay by)
-                                :rx rounding
-                                :ry rounding
-                                :width (abs (- ax bx))
-                                :height (abs (- ay by))
-                                :fill (web-color (color rect))
-                                :fill-opacity (opacity rect))))))
+       (bx by (b rect))
+       (r (round-corners rect)))
+    (svg:draw (scene canvas) (:rect
+                              :x (min ax bx)
+                              :y (min ay by)
+                              :rx r
+                              :ry r
+                              :width (abs (- ax bx))
+                              :height (abs (- ay by))
+                              :fill (web-color (color rect))
+                              :fill-opacity (opacity rect)))))
+
+
+;;;; Circles ------------------------------------------------------------------
+(defmethod draw ((canvas svg-canvas) (circ circle))
+  (with-coordinates canvas
+      ((x y (center circ))
+       (r (radius circ)))
+    (svg:draw (scene canvas) (:circle :cx x :cy y :r r
+                              :fill (web-color (color circ))
+                              :fill-opacity (opacity circ)))))
 
 
 ;;;; Paths --------------------------------------------------------------------
@@ -73,7 +83,7 @@
                                                          (list bx by)
                                                          (list cx cy)))
                               :fill "none"
-                              :stroke-width 0.25
+                              :stroke-width 1
                               :stroke-opacity (opacity tri)
                               :stroke (web-color (color tri))))))
 
