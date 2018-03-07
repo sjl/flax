@@ -13,7 +13,7 @@
 
 (defun convert (points)
   (append
-    (map 'list #'convert-point points)
+    ;; (map 'list #'convert-point points)
     (map 'list #'convert-triangle (triangulate points))))
 
 (defun triangulate (points)
