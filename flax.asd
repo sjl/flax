@@ -39,5 +39,6 @@
        (:file "002-wobbly-lines")
        (:file "003-basic-l-systems")
        (:file "004-turtle-curves")
-       (:file "005-simple-triangulations")))))))
+       (:file "005-simple-triangulations")
+       (:file "006-tracing-lines")))))))
 

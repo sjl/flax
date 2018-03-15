@@ -1,6 +1,6 @@
 (defpackage :flax.base
   (:use :cl :iterate :losh :flax.quickutils)
-  (:export :rand :with-seed))
+  (:export :rand :with-seed :round-to))
 
 (defpackage :flax.coordinates
   (:use :cl :iterate :losh :flax.base :flax.quickutils)
@@ -57,6 +57,12 @@
   (:export :loom))
 
 (defpackage :flax.looms.005-simple-triangulations
+  (:use :cl :iterate :losh :flax.base :flax.quickutils
+    :flax.colors
+    :flax.coordinates)
+  (:export :loom))
+
+(defpackage :flax.looms.006-tracing-lines
   (:use :cl :iterate :losh :flax.base :flax.quickutils
     :flax.colors
     :flax.coordinates)
