@@ -101,4 +101,4 @@
     (flax.drawing:render canvas (convert (generate-universe-balancing depth seed)))))
 
 
-;; (time (loom 1964055800 17 "out" :png 1000 1000))
+;; (time (loom (pr (random (expt 2 31))) 12 "out" :svg 1000 1000))

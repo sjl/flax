@@ -21,49 +21,52 @@
 (define-modify-macro rotf (amount) rot)
 
 
-(defgeneric perform-command (turtle command))
+(defgeneric perform-command (turtle command n))
 
-(defmethod perform-command (turtle (command (eql 'f)))
+(defmethod perform-command (turtle (command (eql 'f)) n)
   (with-turtle (turtle)
     (list (flax.drawing:path
             (list (coord x y)
-                  (progn (perform-command turtle 's)
+                  (progn (perform-command turtle 's n)
                          (coord x y)))
             :color *color*))))
 
-(defmethod perform-command (turtle (command (eql 'fl)))
-  (perform-command turtle 'f))
+(defmethod perform-command (turtle (command (eql 'fl)) n)
+  (perform-command turtle 'f n))
 
-(defmethod perform-command (turtle (command (eql 'fr)))
-  (perform-command turtle 'f))
+(defmethod perform-command (turtle (command (eql 'fr)) n)
+  (perform-command turtle 'f n))
 
-(defmethod perform-command (turtle (command (eql 's)))
-  (with-turtle (turtle)
-    (incf x (* *step* (cos angle)))
-    (incf y (* *step* (sin angle))))
+(defmethod perform-command (turtle (command (eql 's)) n)
+  (do-repeat n
+    (with-turtle (turtle)
+      (incf x (* *step* (cos angle)))
+      (incf y (* *step* (sin angle)))))
   nil)
 
-(defmethod perform-command (turtle (command (eql 'x)))
+(defmethod perform-command (turtle (command (eql 'x)) n)
   nil)
 
-(defmethod perform-command (turtle (command (eql '-)))
-  (rotf (turtle-angle turtle) *angle*)
+(defmethod perform-command (turtle (command (eql '-)) n)
+  (rotf (turtle-angle turtle) (* n *angle*))
   nil)
 
-(defmethod perform-command (turtle (command (eql '+)))
-  (rotf (turtle-angle turtle) (- *angle*))
+(defmethod perform-command (turtle (command (eql '+)) n)
+  (rotf (turtle-angle turtle) (* n (- *angle*)))
   nil)
 
-(defmethod perform-command (turtle (command (eql '<)))
-  (with-turtle (turtle)
-    (push (list x y angle) state))
+(defmethod perform-command (turtle (command (eql '<)) n)
+  (do-repeat n
+    (with-turtle (turtle)
+      (push (list x y angle) state)))
   nil)
 
-(defmethod perform-command (turtle (command (eql '>)))
-  (with-turtle (turtle)
-    (when-let ((prev (pop state)))
-      (destructuring-bind (ox oy oa) prev
-          (setf x ox y oy angle oa))))
+(defmethod perform-command (turtle (command (eql '>)) n)
+  (do-repeat n
+    (with-turtle (turtle)
+      (when-let ((prev (pop state)))
+        (destructuring-bind (ox oy oa) prev
+          (setf x ox y oy angle oa)))))
   nil)
 
 
@@ -96,8 +99,20 @@
       (x p2) (map-range min-x max-x x-padding (- 1.0 x-padding) %)
       (y p2) (map-range min-y max-y y-padding (- 1.0 y-padding) %))))
 
+
+(defun encode (commands)
+  (iterate
+    (with n = 1)
+    (for (command . next) :on commands)
+    (if (eq command (car next))
+      (incf n)
+      (progn (collect (cons command n))
+             (setf n 1)))))
+
 (defun turtle-draw (commands)
-  (let ((paths (mapcan (curry #'perform-command (make-turtle)) commands)))
+  (let ((paths (iterate (with turtle = (make-turtle))
+                        (for (command . n) :in (encode commands))
+                        (appending (perform-command turtle command n)))))
     (scale paths)
     paths))
 
@@ -293,4 +308,5 @@
                  (if should-mutate mutation-seed nil)))))
 
 
-;; (time (loom (pr (random (expt 2 31))) "out" :svg 1000 1000))
+;; (time (loom 201354591 "out" :svg 1000 1000
+;;             *tree-f* 6 (- 1/4tau)))
