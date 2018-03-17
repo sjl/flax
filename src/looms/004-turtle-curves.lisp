@@ -31,10 +31,10 @@
                          (coord x y)))
             :color *color*))))
 
-(defmethod perform-command (turtle (command (eql 'fl)) n)
+(defmethod perform-command (turtle (command (eql 'l)) n)
   (perform-command turtle 'f n))
 
-(defmethod perform-command (turtle (command (eql 'fr)) n)
+(defmethod perform-command (turtle (command (eql 'r)) n)
   (perform-command turtle 'f n))
 
 (defmethod perform-command (turtle (command (eql 's)) n)
@@ -83,21 +83,23 @@
            (minimizing (y p2) :into min-y)
            (finally (return (list min-x min-y max-x max-y)))))
 
-(defun scale (paths)
+(defun scale (paths &optional (bottom-padding 0))
   (iterate
     ;; (with aspect = 1)
     (with (min-x min-y max-x max-y)  = (find-bounds paths))
     (with factor = (min (/ (- max-x min-x))
                         (/ (- max-y min-y))))
-    (with x-padding = (/ (- 1.0 (* factor (- max-x min-x))) 2))
+    (with x-padding = (+ (/ (- 1.0 (* factor (- max-x min-x))) 2)
+                         (/ bottom-padding 2)))
     (with y-padding = (/ (- 1.0 (* factor (- max-y min-y))) 2))
     (for path :in paths)
     (for (p1 p2) = (flax.drawing:points path))
     (zapf
       (x p1) (map-range min-x max-x x-padding (- 1.0 x-padding) %)
-      (y p1) (map-range min-y max-y y-padding (- 1.0 y-padding) %)
+      (y p1) (map-range min-y max-y y-padding (- 1.0 y-padding bottom-padding) %)
       (x p2) (map-range min-x max-x x-padding (- 1.0 x-padding) %)
-      (y p2) (map-range min-y max-y y-padding (- 1.0 y-padding) %))))
+      (y p2) (map-range min-y max-y y-padding (- 1.0 y-padding bottom-padding) %)))
+  paths)
 
 
 (defun encode (commands)
@@ -110,11 +112,22 @@
              (setf n 1)))))
 
 (defun turtle-draw (commands)
-  (let ((paths (iterate (with turtle = (make-turtle))
-                        (for (command . n) :in (encode commands))
-                        (appending (perform-command turtle command n)))))
-    (scale paths)
-    paths))
+  (iterate (with turtle = (make-turtle))
+           (for (command . n) :in (encode commands))
+           (appending (perform-command turtle command n))))
+
+
+;;;; Production Drawing -------------------------------------------------------
+(defun draw-productions (productions size)
+  (iterate
+    (with width = (/ 1.0 (/ (length productions) 2)))
+    (for (word production) :on productions :by #'cddr)
+    (for x :from (/ width 2) :by width)
+    (collect (flax.drawing:text
+               (coord x 1.0) size "Montepetrum"
+               (string-downcase (format nil "~S ~S" word production))
+               :align :middle
+               :color (rgb 1 1 1)))))
 
 
 ;;;; L-Systems ----------------------------------------------------------------
@@ -182,17 +195,17 @@
 (define-l-system unnamed-koch-f (f - f - f - f)
   f (f - f + f - f - f))
 
-(define-l-system dragon-curve fl
-  fl (fl + fr +)
-  fr (- fl - fr))
+(define-l-system dragon-curve l
+  l (l + r +)
+  r (- l - r))
 
-(define-l-system (sierpinski-gasket :angle (/ tau 6)) fr
-  fl (fr + fl + fr)
-  fr (fl - fr - fl))
+(define-l-system (sierpinski-gasket :angle (/ tau 6)) r
+  l (r + l + r)
+  r (l - r - l))
 
-(define-l-system (hexagonal-gosper-curve :angle (/ tau 6)) fl
-  fl (fl + fr + + fr - fl - - fl fl - fr +)
-  fr (- fl + fr fr + + fr + fl - - fl - fr))
+(define-l-system (hexagonal-gosper-curve :angle (/ tau 6)) l
+  l (l + r + + r - l - - l l - r +)
+  r (- l + r r + + r + l - - l - r))
 
 
 (define-l-system (tree-a :angle (radians 25.7)) f
@@ -272,7 +285,7 @@
               #'rand))
 
 (defun loom (seed filename filetype width height
-             &optional l-system iterations starting-angle)
+             &key l-system iterations starting-angle render-productions)
   (nest
     (with-seed seed)
     (destructuring-bind
@@ -291,6 +304,7 @@
            (axiom (l-system-axiom l-system))
            (should-mutate (randomp 0.6 #'rand))
            (mutation-seed (rand (expt 2 31)))
+           (production-font-size 0.04)
            (productions (-<> l-system
                           l-system-productions
                           (if should-mutate
@@ -299,14 +313,26 @@
                             <>)))
            (*angle* (l-system-recommended-angle l-system))))
     (flax.drawing:with-rendering
-        (canvas filetype filename width height :background bg))
+        (canvas filetype filename width height
+                :background bg
+                :padding (if render-productions 0.015 0.05)))
     (progn (-<> (run-l-system axiom productions iterations)
-             (turtle-draw <>)
+             turtle-draw
+             (scale <> (if render-productions (* 1.1 production-font-size) 0.0))
              (flax.drawing:render canvas <>))
+           (when render-productions
+             (-<> productions
+               (draw-productions <> production-font-size)
+               (flax.drawing:render canvas <>)))
            (list (l-system-name l-system)
                  iterations
                  (if should-mutate mutation-seed nil)))))
 
 
-;; (time (loom 201354591 "out" :svg 1000 1000
-;;             *tree-f* 6 (- 1/4tau)))
+;; (time (loom (pr (random (expt 2 31))) "out" :svg 800 800
+;;             :l-system *hexagonal-gosper-curve*
+;;             :iterations 4 
+;;             :starting-angle (- 1/4tau)
+;;             :render-productions nil
+;;             ))
+

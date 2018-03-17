@@ -30,7 +30,8 @@
     :path
     :points
     :rectangle
-    :circle))
+    :circle
+    :text))
 
 
 (defpackage :flax.looms.001-triangles

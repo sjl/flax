@@ -51,6 +51,21 @@
                               :fill-opacity (opacity circ)))))
 
 
+;;;; Text ---------------------------------------------------------------------
+(defmethod draw ((canvas svg-canvas) (text text))
+  (with-coordinates canvas
+      ((x y (pos text))
+       (size (size text)))
+    (svg:text (scene canvas)
+              (:x x :y y
+               :font-size size
+               :font-family (font text)
+               :text-anchor (string-downcase (align text)) ; dammit inkscape
+               :fill (web-color (color text))
+               :fill-opacity (opacity text))
+              (content text))))
+
+
 ;;;; Paths --------------------------------------------------------------------
 (defun make-svg-path-data (canvas points)
   (destructuring-bind (first-point &rest remaining-points)

@@ -1,7 +1,7 @@
 (in-package :flax.looms.006-tracing-lines)
 
 ;;;; Config -------------------------------------------------------------------
-(defparameter *spread* 0.0020)
+(defparameter *spread-y* 0.0020)
 
 
 ;;;; Convert ------------------------------------------------------------------
@@ -26,7 +26,7 @@
   (make-array points :initial-element 0.0))
 
 (defun perturb (point)
-  (random-around point *spread* #'rand))
+  (random-around point *spread-y* #'rand))
 
 (defun wrapping-aref (array i)
   (aref array (mod i (length array))))
@@ -41,7 +41,7 @@
                       (average (subseq line
                                        (max 0 (- i 2))
                                        (min (1- (length line)) (+ i 1))))
-                      *spread* #'rand)
+                      *spread-y* #'rand)
                     :result-type 'vector)))
 
 (defun generate-lines (points lines)
@@ -52,16 +52,18 @@
 
 
 ;;;; Main ---------------------------------------------------------------------
-(defun loom (seed filename filetype width height)
+(defun loom (seed filename filetype width height &key lines points)
   (nest
     (with-seed seed)
     (flax.drawing:with-rendering (canvas filetype filename width height
                                          :background (hsv 0 0 0.05)))
-    (let* ((points (round-to (random-range 100 150 #'rand) 10))
-           (lines (round-to (random-range 80 140 #'rand) 10))
-           (*spread* (/ 0.15 lines))))
+    (let* ((points% (round-to (random-range 100 150 #'rand) 10))
+           (lines% (round-to (random-range 80 140 #'rand) 10))
+           (lines (or lines lines%))
+           (points (or points points%))
+           (*spread-y* (/ 0.15 lines))))
     (progn
       (flax.drawing:render canvas (convert-lines (generate-lines points lines)))
       (list points lines))))
 
-;; (time (loom nil "out" :svg 800 800))
+;; (time (loom nil "out" :svg 800 800 :lines 200 :points 100))

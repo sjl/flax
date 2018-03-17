@@ -148,6 +148,30 @@
             (radius o))))
 
 
+;;;; Text ---------------------------------------------------------------------
+(defclass* (text :conc-name "") (drawable)
+  ((pos :type coord)
+   (font :type string)
+   (size :type single-float)
+   (align :type keyword)
+   (content :type string)))
+
+(defun text (position size font content
+             &key (opacity 1.0d0) (color *black*) (align :left))
+  (make-instance 'text
+    :pos position :size size :font font :content content
+    :align align
+    :color color
+    :opacity (coerce opacity 'double-float)))
+
+(defmethod print-object ((o text) s)
+  (print-unreadable-object (o s :type t :identity nil)
+    (format s "~S (~D, ~D)"
+            (content o)
+            (x (pos o))
+            (y (pos o)))))
+
+
 ;;;; Rendering ----------------------------------------------------------------
 (defgeneric render-object (canvas object))
 
