@@ -2,7 +2,7 @@
 
 ;; https://mattdesl.svbtle.com/pen-plotter-1
 
-(defparameter *point-size* 0.006)
+(defparameter *point-size* 0.003)
 
 (defun convert-point (point)
   (flax.drawing:circle point (random-gaussian *point-size*
