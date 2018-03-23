@@ -57,13 +57,14 @@
     (with-seed seed)
     (flax.drawing:with-rendering (canvas filetype filename width height
                                          :background (hsv 0 0 0.05)))
-    (let* ((points% (round-to (random-range 100 150 #'rand) 10))
-           (lines% (round-to (random-range 80 140 #'rand) 10))
-           (lines (or lines lines%))
-           (points (or points points%))
-           (*spread-y* (/ 0.15 lines))))
+    (randomly-initialize
+      ((points (round-to (random-range 100 150 #'rand) 10))
+       (lines (round-to (random-range 80 140 #'rand) 10))))
+    (let ((*spread-y* (/ 0.15 lines))))
     (progn
-      (flax.drawing:render canvas (convert-lines (generate-lines points lines)))
-      (list points lines))))
+      (-<> (generate-lines points lines)
+        convert-lines
+        (flax.drawing:render canvas <>))
+      (values lines points))))
 
-;; (time (loom nil "out" :svg 800 800 :lines 200 :points 100))
+;; (time (loom 4 "out" :svg 800 800))

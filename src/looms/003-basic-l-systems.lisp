@@ -97,14 +97,15 @@
   (gimme length (random-elt '(ar al br bl) #'rand)))
 
 (defun loom-anabaena-catenula (seed filename filetype width height)
-  (with-seed seed
+  (nest
+    (with-seed seed)
     (flax.drawing:with-rendering
-        (canvas filetype filename width height :background *background*)
-      (anabaena-catenula (maximum-words)
-                         :axiom (random-anabaena-catenula-axiom
-                                  (random-range-inclusive 1 6 #'rand))
-                         :mutate #'cull
-                         :callback (lambda (iteration word)
-                                     (flax.drawing:render canvas (convert word iteration)))))))
+        (canvas filetype filename width height :background *background*))
+    (anabaena-catenula (maximum-words)
+                       :axiom (random-anabaena-catenula-axiom
+                                (random-range-inclusive 1 6 #'rand))
+                       :mutate #'cull
+                       :callback (lambda (iteration word)
+                                   (flax.drawing:render canvas (convert word iteration))))))
 
-;; (time (loom-anabaena-catenula nil "out" :png 2000 2000))
+;; (time (loom-anabaena-catenula nil "out" :svg 800 800))

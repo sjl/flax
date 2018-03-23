@@ -200,7 +200,7 @@
                                           :width ,width
                                           :background ,background))
              (*padding* ,padding))
-         (prog1 ,@body
+         (multiple-value-prog1 ,@body
            (write-file ,canvas-symbol (full-filename ,filename ,canvas-type)))))))
 
 
@@ -212,5 +212,5 @@
 ;;; * Add a new subclass of canvas.
 ;;; * Implement make-canvas.
 ;;; * Implement all the drawing methods for the various shapes.
-;;; * Implement render (which should call draw and maybe do other stuff).
+;;; * Implement render-object (which should call draw and maybe do other stuff).
 ;;; * Implement write-file.

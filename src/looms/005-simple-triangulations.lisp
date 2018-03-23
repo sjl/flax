@@ -44,26 +44,30 @@
            (collect (funcall generator) 
                     :result-type 'vector)))
 
-(defun loom (seed points filename filetype width height &key ratio)
-  (losh::clear-gaussian-spare)
+(defun select-generator ()
+  (random-elt '((generate-point-uniform "Uniform")
+                (generate-point-gaussian "Gaussian")
+                (generate-point-gaussian-vertical "Vertical Gaussian")
+                (generate-point-gaussian-horizontal "Horizontal Gaussian"))
+              #'rand))
+
+(defun loom (seed filename filetype width height &key ratio points)
   (nest
     (with-seed seed)
     (flax.drawing:with-rendering (canvas filetype filename width height
                                          :background (hsv 0.09 0.05 0.975)))
-    (destructuring-bind (generator generator-name)
-        (random-elt '((generate-point-uniform "Uniform")
-                      (generate-point-gaussian "Gaussian")
-                      (generate-point-gaussian-vertical "Vertical Gaussian")
-                      (generate-point-gaussian-horizontal "Horizontal Gaussian"))
-                    #'rand))
-    (let* ((triangulation-ratio (if (randomp 0.5 #'rand)
-                                  1
-                                  (random-range 0.1 0.3 #'rand)))
-           (triangulation-ratio (or ratio triangulation-ratio))))
+    (destructuring-bind (generator generator-name) (select-generator))
+    (randomly-initialize
+      ((ratio (if (randomp 0.5 #'rand)
+                1
+                (random-range 0.05 0.2 #'rand)))
+       (points (round-to (random-range-inclusive 200 700 #'rand)
+                         10))))
     (progn
-      (flax.drawing:render canvas (convert (generate generator points)
-                                           triangulation-ratio))
-      (list generator-name triangulation-ratio))))
+      (-<> (generate generator points)
+        (convert <> ratio)
+        (flax.drawing:render canvas <>))
+      (values generator-name points ratio))))
 
 
-;; (time (loom 5 400 "out" :svg 800 800 :ratio nil))
+;; (time (loom 55 "out" :svg 800 800 ))

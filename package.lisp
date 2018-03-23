@@ -1,6 +1,11 @@
 (defpackage :flax.base
   (:use :cl :iterate :losh :flax.quickutils)
-  (:export :rand :with-seed :round-to))
+  (:export
+    :rand
+    :with-seed
+    :random-or
+    :randomly-initialize
+    :round-to))
 
 (defpackage :flax.coordinates
   (:use :cl :iterate :losh :flax.base :flax.quickutils)

@@ -55,25 +55,29 @@
 
 
 ;;;; Main ---------------------------------------------------------------------
-(defun loom (seed ticks filename filetype width height)
-  (with-seed seed
+(defun loom (seed filename filetype width height &key mode ticks)
+  (nest
+    (with-seed seed)
     (flax.drawing:with-rendering (canvas filetype filename width height
                                          :padding 0.0
-                                         :background *background*)
-      (let ((line (initial 300))
-            (*hue* (random-range 0.0d0 1.0d0 #'rand))
-            (*hue-increment* (/ (random-range 0.15d0 0.3d0 #'rand) ticks))
-            (mode (random-elt '(:opaque :transparent :fade) #'rand)))
-        (dotimes (tick ticks)
-          (when (dividesp tick (/ (expt 10 (floor (log (1- ticks) 10))) 2))
-            (print tick))
-          (when (and (eq filetype :png) (eq mode :fade) (dividesp tick 10))
-            (flax.drawing:fade canvas *background* 0.04d0))
-          (flax.drawing:render canvas (convert line (if (eq mode :transparent)
-                                                      (/ 95.0d0 ticks)
-                                                      1.0d0)))
-          (tick line))
-        mode))))
+                                         :background *background*))
+    (randomly-initialize
+      ((ticks (round-to (random-range 800 5000 #'rand) 100))
+       (mode (random-elt '(:opaque :transparent :fade) #'rand))))
+    (let ((line (initial 300))
+          (*hue* (random-range 0.0d0 1.0d0 #'rand))
+          (*hue-increment* (/ (random-range 0.15d0 0.3d0 #'rand) ticks))))
+    (progn
+      (dotimes (tick ticks)
+        (when (dividesp tick (/ (expt 10 (floor (log (1- ticks) 10))) 2))
+          (print tick))
+        (when (and (eq filetype :png) (eq mode :fade) (dividesp tick 10))
+          (flax.drawing:fade canvas *background* 0.04d0))
+        (flax.drawing:render canvas (convert line (if (eq mode :transparent)
+                                                    (/ 95.0d0 ticks)
+                                                    1.0d0)))
+        (tick line))
+      (values mode ticks))))
 
 
-;; (time (loom nil 1000 "out" :svg 800 300))
+;; (time (loom 133 "out" :svg 800 300))

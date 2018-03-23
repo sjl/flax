@@ -83,22 +83,21 @@
            (minimizing (y p2) :into min-y)
            (finally (return (list min-x min-y max-x max-y)))))
 
-(defun scale (paths &optional (bottom-padding 0))
+(defun scale (paths)
   (iterate
     ;; (with aspect = 1)
     (with (min-x min-y max-x max-y)  = (find-bounds paths))
     (with factor = (min (/ (- max-x min-x))
                         (/ (- max-y min-y))))
-    (with x-padding = (+ (/ (- 1.0 (* factor (- max-x min-x))) 2)
-                         (/ bottom-padding 2)))
+    (with x-padding = (/ (- 1.0 (* factor (- max-x min-x))) 2))
     (with y-padding = (/ (- 1.0 (* factor (- max-y min-y))) 2))
     (for path :in paths)
     (for (p1 p2) = (flax.drawing:points path))
     (zapf
       (x p1) (map-range min-x max-x x-padding (- 1.0 x-padding) %)
-      (y p1) (map-range min-y max-y y-padding (- 1.0 y-padding bottom-padding) %)
+      (y p1) (map-range min-y max-y y-padding (- 1.0 y-padding) %)
       (x p2) (map-range min-x max-x x-padding (- 1.0 x-padding) %)
-      (y p2) (map-range min-y max-y y-padding (- 1.0 y-padding bottom-padding) %)))
+      (y p2) (map-range min-y max-y y-padding (- 1.0 y-padding) %)))
   paths)
 
 
@@ -115,19 +114,6 @@
   (iterate (with turtle = (make-turtle))
            (for (command . n) :in (encode commands))
            (appending (perform-command turtle command n))))
-
-
-;;;; Production Drawing -------------------------------------------------------
-(defun draw-productions (productions size)
-  (iterate
-    (with width = (/ 1.0 (/ (length productions) 2)))
-    (for (word production) :on productions :by #'cddr)
-    (for x :from (/ width 2) :by width)
-    (collect (flax.drawing:text
-               (coord x 1.0) size "Montepetrum"
-               (string-downcase (format nil "~S ~S" word production))
-               :align :middle
-               :color (rgb 1 1 1)))))
 
 
 ;;;; L-Systems ----------------------------------------------------------------
@@ -260,6 +246,14 @@
   (iterate (for (letter production . nil) :on productions :by #'cddr)
            (appending (list letter (mutate-production (copy-list production))))))
 
+(defun maybe-mutate-productions (productions)
+  (let ((should-mutate (randomp 0.6 #'rand))
+        (mutation-seed (rand (expt 2 31))))
+    (if should-mutate
+      (with-seed mutation-seed
+        (values (mutate-productions productions) mutation-seed))
+      productions)))
+
 
 ;;;; Main ---------------------------------------------------------------------
 (defun select-l-system ()
@@ -284,55 +278,45 @@
                 (,*tree-f* 4 7 ,(- 1/4tau)))
               #'rand))
 
+
 (defun loom (seed filename filetype width height
-             &key l-system iterations starting-angle render-productions)
+             &key l-system iterations starting-angle)
   (nest
     (with-seed seed)
     (destructuring-bind
-        (l-system min-iterations max-iterations &optional starting-angle)
-        (if l-system
-          (list l-system iterations iterations starting-angle)
-          (select-l-system)))
-    (let* ((*starting-angle* (or (or starting-angle (rand tau))))
+        (random-l-system min-iterations max-iterations &optional random-starting-angle)
+        (select-l-system))
+    (randomly-initialize
+      ((starting-angle (random-or random-starting-angle (rand tau)))
+       (iterations (random-range-inclusive min-iterations max-iterations #'rand))
+       (l-system random-l-system)))
+    (let* ((*starting-angle* starting-angle)
            (bg (hsv (rand 1.0) (rand 1.0) (random-range 0.0 0.2 #'rand)))
            (*color* (hsv (rand 1.0)
                          (random-range 0.5 0.8 #'rand)
                          (random-range 0.9 1.0 #'rand)))
-           (iterations (random-range-inclusive min-iterations
-                                               max-iterations
-                                               #'rand))
            (axiom (l-system-axiom l-system))
-           (should-mutate (randomp 0.6 #'rand))
-           (mutation-seed (rand (expt 2 31)))
-           (production-font-size 0.04)
-           (productions (-<> l-system
-                          l-system-productions
-                          (if should-mutate
-                            (with-seed mutation-seed
-                              (mutate-productions <>))
-                            <>)))
            (*angle* (l-system-recommended-angle l-system))))
+    (multiple-value-bind (productions mutagen)
+        (-<> l-system
+          l-system-productions
+          maybe-mutate-productions))
     (flax.drawing:with-rendering
-        (canvas filetype filename width height
-                :background bg
-                :padding (if render-productions 0.015 0.05)))
-    (progn (-<> (run-l-system axiom productions iterations)
-             turtle-draw
-             (scale <> (if render-productions (* 1.1 production-font-size) 0.0))
-             (flax.drawing:render canvas <>))
-           (when render-productions
-             (-<> productions
-               (draw-productions <> production-font-size)
-               (flax.drawing:render canvas <>)))
-           (list (l-system-name l-system)
-                 iterations
-                 (if should-mutate mutation-seed nil)))))
+        (canvas filetype filename width height :background bg :padding 0.05))
+    (progn
+      (-<> (run-l-system axiom productions iterations)
+        turtle-draw
+        scale
+        (flax.drawing:render canvas <>))
+      (values (l-system-name l-system)
+              iterations
+              mutagen))))
 
 
-;; (time (loom (pr (random (expt 2 31))) "out" :svg 800 800
-;;             :l-system *hexagonal-gosper-curve*
-;;             :iterations 4 
-;;             :starting-angle (- 1/4tau)
-;;             :render-productions nil
+
+;; (time (loom 12 "out" :svg 800 800
+;;             ;; :l-system *hexagonal-gosper-curve*
+;;             ;; :iterations 5 
+;;             ;; :starting-angle (- 1/4tau)
 ;;             ))
 

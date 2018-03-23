@@ -76,29 +76,34 @@
       (list (triangle p b a)
             (triangle p a c)))))
 
-(defun generate-universe-balancing (depth seed)
-  (losh::clear-gaussian-spare)
-  (with-seed seed
-    (gathering
-      (labels ((should-stop-p (iteration)
-                 (or (= depth iteration)
-                     (and (> iteration 6)
-                          (randomp (map-range 0 depth
-                                              0.0 0.05
-                                              iteration)
-                                   #'rand))))
-               (recur (triangle &optional (iteration 0))
-                 (if (should-stop-p iteration)
-                   (gather triangle)
-                   (map nil (rcurry #'recur (1+ iteration))
-                        (split-triangle-self-balancing triangle)))))
-        (map nil #'recur (initial-triangles))))))
+(defun generate-universe-balancing (depth)
+  (gathering
+    (labels ((should-stop-p (iteration)
+               (or (= depth iteration)
+                   (and (> iteration 6)
+                        (randomp (map-range 0 depth
+                                            0.0 0.05
+                                            iteration)
+                                 #'rand))))
+             (recur (triangle &optional (iteration 0))
+               (if (should-stop-p iteration)
+                 (gather triangle)
+                 (map nil (rcurry #'recur (1+ iteration))
+                      (split-triangle-self-balancing triangle)))))
+      (map nil #'recur (initial-triangles)))))
 
 
 ;;;; Main ---------------------------------------------------------------------
-(defun loom (seed depth filename filetype width height)
-  (flax.drawing:with-rendering (canvas filetype filename width height)
-    (flax.drawing:render canvas (convert (generate-universe-balancing depth seed)))))
+(defun loom (seed filename filetype width height &key depth)
+  (nest
+    (with-seed seed)
+    (randomly-initialize ((depth (random-range-inclusive 14 19 #'rand))))
+    (flax.drawing:with-rendering (canvas filetype filename width height))
+    (progn
+      (-<> (generate-universe-balancing depth)
+        convert
+        (flax.drawing:render canvas <>))
+      (values depth))))
 
 
-;; (time (loom (pr (random (expt 2 31))) 12 "out" :svg 1000 1000))
+;; (time (loom nil "out" :svg 800 800))
