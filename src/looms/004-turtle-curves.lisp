@@ -314,9 +314,9 @@
 
 
 
-;; (time (loom 12 "out" :svg 800 800
+;; (time (loom 12 "out" :plot 800 800
 ;;             ;; :l-system *hexagonal-gosper-curve*
-;;             ;; :iterations 5 
+;;             :iterations 5 
 ;;             ;; :starting-angle (- 1/4tau)
 ;;             ))
 

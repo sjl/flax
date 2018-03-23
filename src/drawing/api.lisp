@@ -183,9 +183,16 @@
 (defgeneric write-file (canvas filename))
 
 
+;;;; File Extensions ----------------------------------------------------------
+(defgeneric file-extension (type))
+
+(defmethod file-extension (type)
+  (string-downcase (symbol-name type)))
+
+
 ;;;; Toplevel -----------------------------------------------------------------
 (defun full-filename (filename canvas-type)
-  (format nil "~A.~A" filename (string-downcase (symbol-name canvas-type))))
+  (format nil "~A.~A" filename (file-extension canvas-type)))
 
 (defmacro with-rendering
     ((canvas-symbol canvas-type filename width height &key

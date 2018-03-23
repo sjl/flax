@@ -32,7 +32,8 @@
      (:module "drawing" :serial t
       :components ((:file "api")
                    (:file "png")
-                   (:file "svg")))
+                   (:file "svg")
+                   (:file "plot")))
      (:module "looms" :serial nil
       :components
       ((:file "001-triangles")
