@@ -126,4 +126,4 @@
       (values shapes))))
 
 ;; (time (loom 11 "out" :png 800 800))
-(time (loom 112 "out" :plot 800 800 :ratio 40000))
+;; (time (loom 112 "out" :plot 800 800 :ratio 40000))

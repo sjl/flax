@@ -61,8 +61,7 @@
       ((ratio (if (randomp 0.5 #'rand)
                 1
                 (random-range 0.05 0.2 #'rand)))
-       (points (round-to (random-range-inclusive 200 700 #'rand)
-                         10))))
+       (points (round-to (random-range-inclusive 100 1000 #'rand) 10))))
     (progn
       (-<> (generate generator points)
         (convert <> ratio)

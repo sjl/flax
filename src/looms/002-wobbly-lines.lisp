@@ -62,7 +62,7 @@
                                          :padding 0.0
                                          :background *background*))
     (randomly-initialize
-      ((ticks (round-to (random-range 800 5000 #'rand) 100))
+      ((ticks (round-to (random-range 3000 8000 #'rand) 1000))
        (mode (random-elt '(:opaque :transparent :fade) #'rand))))
     (let ((line (initial 300))
           (*hue* (random-range 0.0d0 1.0d0 #'rand))
