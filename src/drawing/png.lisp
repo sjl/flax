@@ -72,6 +72,14 @@
       (vectors:update-state (state canvas) <>))))
 
 
+;;;; Points -------------------------------------------------------------------
+(defmethod draw ((canvas png-canvas) (p point))
+  (with-coordinates canvas
+      ((x y (location p)))
+    (-<> (paths:make-circle-path x y 2)
+      (vectors:update-state (state canvas) <>))))
+
+
 ;;;; Paths --------------------------------------------------------------------
 (defmethod draw ((canvas png-canvas) (p path))
   (-<> (points p)

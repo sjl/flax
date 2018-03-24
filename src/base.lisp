@@ -7,7 +7,8 @@
 (defmacro with-seed (seed &body body)
   (once-only (seed)
     `(let ((pcg::*global-generator*
-             (pcg:make-pcg :seed (pr (or ,seed (random (expt 2 31)))))))
+             (pcg:make-pcg :seed (pr (or ,seed (random (expt 2 31))))))
+           (chancery:*random* #'rand))
        (losh::clear-gaussian-spare)
        ,@body)))
 

@@ -148,6 +148,22 @@
             (radius o))))
 
 
+;;;; Points -------------------------------------------------------------------
+(defclass* (point :conc-name "") (drawable)
+  ((location :type coord)))
+
+(defun point (location &key (opacity 1.0d0) (color *black*))
+  (make-instance 'point :location location
+    :color color
+    :opacity (coerce opacity 'double-float)))
+
+(defmethod print-object ((o point) s)
+  (print-unreadable-object (o s :type t :identity nil)
+    (format s "(~D, ~D)"
+            (x (location o))
+            (y (location o)))))
+
+
 ;;;; Text ---------------------------------------------------------------------
 (defclass* (text :conc-name "") (drawable)
   ((pos :type coord)

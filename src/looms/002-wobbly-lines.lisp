@@ -55,7 +55,7 @@
 
 
 ;;;; Main ---------------------------------------------------------------------
-(defun loom (seed filename filetype width height &key mode ticks)
+(defun loom (seed filename filetype width height &key mode ticks verbose)
   (nest
     (with-seed seed)
     (flax.drawing:with-rendering (canvas filetype filename width height
@@ -69,7 +69,8 @@
           (*hue-increment* (/ (random-range 0.15d0 0.3d0 #'rand) ticks))))
     (progn
       (dotimes (tick ticks)
-        (when (dividesp tick (/ (expt 10 (floor (log (1- ticks) 10))) 2))
+        (when (and verbose
+                   (dividesp tick (/ (expt 10 (floor (log (1- ticks) 10))) 2)))
           (print tick))
         (when (and (eq filetype :png) (eq mode :fade) (dividesp tick 10))
           (flax.drawing:fade canvas *background* 0.04d0))

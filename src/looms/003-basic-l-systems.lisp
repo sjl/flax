@@ -96,7 +96,7 @@
 (defun random-anabaena-catenula-axiom (length)
   (gimme length (random-elt '(ar al br bl) #'rand)))
 
-(defun loom-anabaena-catenula (seed filename filetype width height)
+(defun loom (seed filename filetype width height)
   (nest
     (with-seed seed)
     (flax.drawing:with-rendering
@@ -107,5 +107,7 @@
                        :mutate #'cull
                        :callback (lambda (iteration word)
                                    (flax.drawing:render canvas (convert word iteration))))))
+
+
 
 ;; (time (loom-anabaena-catenula nil "out" :svg 800 800))

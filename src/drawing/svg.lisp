@@ -50,6 +50,14 @@
                               :fill (web-color (color circ))
                               :fill-opacity (opacity circ)))))
 
+;;;; Points -------------------------------------------------------------------
+(defmethod draw ((canvas svg-canvas) (p point))
+  (with-coordinates canvas
+      ((x y (location p)))
+    (svg:draw (scene canvas) (:circle :cx x :cy y :r 2.0
+                              :fill (web-color (color p))
+                              :fill-opacity (opacity p)))))
+
 
 ;;;; Text ---------------------------------------------------------------------
 (defmethod draw ((canvas svg-canvas) (text text))

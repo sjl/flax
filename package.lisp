@@ -11,7 +11,9 @@
   (:use :cl :iterate :losh :flax.base :flax.quickutils)
   (:export
     :coord :x :y
+    :radial
     :distance
+    :coord+
     :clerp
     :coord-to-cons))
 
@@ -35,6 +37,7 @@
     :path
     :points
     :rectangle
+    :point
     :circle
     :text))
 
@@ -69,6 +72,12 @@
   (:export :loom))
 
 (defpackage :flax.looms.006-tracing-lines
+  (:use :cl :iterate :losh :flax.base :flax.quickutils
+    :flax.colors
+    :flax.coordinates)
+ (:export :loom))
+
+(defpackage :flax.looms.007-stipple
   (:use :cl :iterate :losh :flax.base :flax.quickutils
     :flax.colors
     :flax.coordinates)
