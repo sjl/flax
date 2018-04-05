@@ -298,9 +298,7 @@
            (axiom (l-system-axiom l-system))
            (*angle* (l-system-recommended-angle l-system))))
     (multiple-value-bind (productions mutagen)
-        (-<> l-system
-          l-system-productions
-          maybe-mutate-productions))
+        (maybe-mutate-productions (l-system-productions l-system)))
     (flax.drawing:with-rendering
         (canvas filetype filename width height :background bg :padding 0.05))
     (progn
