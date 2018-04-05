@@ -14,6 +14,8 @@
                :iterate
                :losh
                :zpng
+               :3d-vectors
+               :3d-matrices
 
                )
 

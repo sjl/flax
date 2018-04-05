@@ -12,9 +12,9 @@
 
 ;;;; Elements -----------------------------------------------------------------
 (defstruct (triangle (:conc-name ""))
-  (a (coord 0 0) :type coord)
-  (b (coord 0 0) :type coord)
-  (c (coord 0 0) :type coord))
+  (a (vec 0 0) :type vec2)
+  (b (vec 0 0) :type vec2)
+  (c (vec 0 0) :type vec2))
 
 (define-with-macro (triangle :conc-name "") a b c)
 
@@ -25,7 +25,9 @@
 ;;;; Element Conversion -------------------------------------------------------
 (defun convert-triangle (triangle)
   (with-triangle (triangle)
-    (flax.drawing:triangle a b c)))
+    (flax.drawing:triangle (coord (vx a) (vy a))
+                           (coord (vx b) (vy b))
+                           (coord (vx c) (vy c)))))
 
 (defun convert (universe)
   (mapcar #'convert-triangle universe))
@@ -33,19 +35,19 @@
 
 ;;;; Generation ---------------------------------------------------------------
 (defun initial-triangles ()
-  (list (triangle (coord 0 1)
-                  (coord 1 1)
-                  (coord 0 0))
-        (triangle (coord 1 0)
-                  (coord 1 1)
-                  (coord 0 0))))
+  (list (triangle (vec 0 1)
+                  (vec 1 1)
+                  (vec 0 0))
+        (triangle (vec 1 0)
+                  (vec 1 1)
+                  (vec 0 0))))
 
 
 (defun split-triangle-evenly (triangle)
   (with-triangle (triangle)
     (let* ((n 1/2)
-           (p (coord (lerp (x b) (x c) n)
-                     (lerp (y b) (y c) n))))
+           (p (vec2 (lerp (vx b) (vx c) n)
+                    (lerp (vy b) (vy c) n))))
       (list (triangle p b a)
             (triangle p a c)))))
 
@@ -57,9 +59,9 @@
 
 (defun find-longest-side (triangle)
   (with-triangle (triangle)
-    (let* ((ab (distance a b))
-           (bc (distance b c))
-           (ca (distance c a))
+    (let* ((ab (vdistance a b))
+           (bc (vdistance b c))
+           (ca (vdistance c a))
            (longest (max ab bc ca)))
       (cond
         ((= longest ab) (list c a b))
@@ -72,7 +74,7 @@
     (let ((p (-<> (random-gaussian 0.5 0.1 #'rand)
                (clamp 0.3 0.7 <>)
                (round-to <> 1/100)
-               (clerp b c <>))))
+               (vlerp b c <>))))
       (list (triangle p b a)
             (triangle p a c)))))
 

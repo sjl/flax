@@ -18,7 +18,8 @@
 
 ;;;; Element Conversion -------------------------------------------------------
 (defun convert (line opacity)
-  (list (flax.drawing::path (coerce (points line) 'list)
+  (list (flax.drawing::path (iterate (for p :in-whatever (points line))
+                                     (collect (coord (vx p) (vy p))))
                             :color (hsv *hue* 0.9 1)
                             :opacity opacity)))
 
@@ -28,12 +29,12 @@
   (line
     (iterate
       (for x :from 0.0 :to (+ 1.0 least-positive-single-float) :by (/ 1.0 segments))
-      (collect (coord x 0.5) :result-type 'vector))))
+      (collect (vec x 0.5) :result-type 'vector))))
 
 
 ;;;; Tick ---------------------------------------------------------------------
 (defun perturb-point (point)
-  (incf (y point) (random-range-inclusive (- *swing*) *swing* #'rand)))
+  (incf (vy point) (random-range-inclusive (- *swing*) *swing* #'rand)))
 
 (defun perturb-line (line)
   (map nil #'perturb-point (points line)))
@@ -42,11 +43,11 @@
   (iterate
     (with points = (points line))
     (with final = (1- (length points)))
-    (for c :in-vector points :with-index i)
-    (for y = (y c))
-    (for l = (or (unless (zerop i) (y (aref points (1- i)))) y))
-    (for r = (or (unless (= final i) (y (aref points (1+ i)))) y))
-    (zapf (y c) (/ (+ % % l r) 4.0))))
+    (for p :in-vector points :with-index i)
+    (for y = (vy p))
+    (for l = (or (unless (zerop i) (vy (aref points (1- i)))) y))
+    (for r = (or (unless (= final i) (vy (aref points (1+ i)))) y))
+    (zapf (vy p) (/ (+ % % l r) 4.0))))
 
 (defun tick (line)
   (perturb-line line)

@@ -44,13 +44,15 @@
 
 (defpackage :flax.looms.001-triangles
   (:use :cl :iterate :losh :flax.base :flax.quickutils
-    :flax.coordinates)
+    :flax.coordinates
+    :3d-vectors)
   (:export :loom))
 
 (defpackage :flax.looms.002-wobbly-lines
   (:use :cl :iterate :losh :flax.base :flax.quickutils
     :flax.colors
-    :flax.coordinates)
+    :flax.coordinates
+    :3d-vectors)
   (:export :loom))
 
 (defpackage :flax.looms.003-basic-l-systems
@@ -68,7 +70,8 @@
 (defpackage :flax.looms.005-simple-triangulations
   (:use :cl :iterate :losh :flax.base :flax.quickutils
     :flax.colors
-    :flax.coordinates)
+    :flax.coordinates
+    :3d-vectors)
   (:export :loom))
 
 (defpackage :flax.looms.006-tracing-lines
@@ -80,7 +83,8 @@
 (defpackage :flax.looms.007-stipple
   (:use :cl :iterate :losh :flax.base :flax.quickutils
     :flax.colors
-    :flax.coordinates)
+    :flax.coordinates
+    :3d-vectors)
   (:export :loom))
 
 

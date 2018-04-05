@@ -5,14 +5,17 @@
 (defparameter *point-size* 0.003)
 
 (defun convert-point (point)
-  (flax.drawing:circle point (random-gaussian *point-size*
+  (flax.drawing:circle (coord (vx point) (vy point))
+                       (random-gaussian *point-size*
                                               (* 0.15 *point-size*)
                                               #'rand)))
 
 (defun convert-triangle (ratio tri)
   (when (randomp ratio #'rand)
     (destructuring-bind (a b c) tri
-      (list (flax.drawing:triangle a b c)))))
+      (list (flax.drawing:triangle (coord (vx a) (vy a))
+                                   (coord (vx b) (vy b))
+                                   (coord (vx c) (vy c)))))))
 
 (defun convert (points ratio)
   (append
@@ -22,22 +25,24 @@
 (defun triangulate (points)
   (mapcar (lambda (indexes)
             (map 'list (curry #'aref points) indexes))
-          (lofi.tri:triangulate (map 'vector #'coord-to-cons points))))
+          (lofi.tri:triangulate (map 'vector (lambda (p)
+                                               (cons (vx p) (vy p)))
+                                     points))))
 
 (defun gauss ()
   (clamp 0.0 1.0 (random-gaussian 0.5 0.15 #'rand)))
 
 (defun generate-point-uniform ()
-  (coord (rand 1.0) (rand 1.0)))
+  (vec2 (rand 1.0) (rand 1.0)))
 
 (defun generate-point-gaussian ()
-  (coord (gauss) (gauss)))
+  (vec2 (gauss) (gauss)))
 
 (defun generate-point-gaussian-vertical ()
-  (coord (rand 1.0) (gauss)))
+  (vec2 (rand 1.0) (gauss)))
 
 (defun generate-point-gaussian-horizontal ()
-  (coord (gauss) (rand 1.0)))
+  (vec2 (gauss) (rand 1.0)))
 
 (defun generate (generator n)
   (iterate (repeat n)

@@ -3,7 +3,8 @@
 
 ;;;; Convert ------------------------------------------------------------------
 (defun convert (points)
-  (mapcar #'flax.drawing:point points))
+  (iterate (for p :in points)
+           (collect (flax.drawing:point (coord (vx p) (vy p))))))
 
 
 ;;;; Shapes -------------------------------------------------------------------
@@ -16,7 +17,7 @@
 
 
 (defun random-coord ()
-  (coord (rand 1.0) (rand 1.0)))
+  (vec (rand 1.0) (rand 1.0)))
 
 (defun gen-rectangle ()
   (make-rectangle :a (random-coord) :b (random-coord)))
@@ -42,19 +43,19 @@
 
 (defmethod bounding-box ((shape circle))
   (with-circle (shape c r)
-    (let ((x (x c))
-          (y (y c)))
-      (cons (coord (- x r) (- y r))
-            (coord (+ x r) (+ y r))))))
+    (let ((x (vx c))
+          (y (vy c)))
+      (cons (vec (- x r) (- y r))
+            (vec (+ x r) (+ y r))))))
 
 (defun random-point-in-bounding-box (bounding-box)
   (destructuring-bind (a . b) bounding-box
-    (let ((x1 (min (x a) (x b)))
-          (x2 (max (x a) (x b)))
-          (y1 (min (y a) (y b)))
-          (y2 (max (y a) (y b))))
-      (coord (random-range-inclusive x1 x2 #'rand)
-             (random-range-inclusive y1 y2 #'rand)))))
+    (let ((x1 (min (vx a) (vx b)))
+          (x2 (max (vx a) (vx b)))
+          (y1 (min (vy a) (vy b)))
+          (y2 (max (vy a) (vy b))))
+      (vec (random-range-inclusive x1 x2 #'rand)
+           (random-range-inclusive y1 y2 #'rand)))))
 
 
 ;;;; Area ---------------------------------------------------------------------
@@ -62,8 +63,8 @@
 
 (defmethod area ((shape rectangle))
   (with-rectangle (shape)
-    (* (abs (- (x a) (x b)))
-       (abs (- (y a) (y b))))))
+    (* (abs (- (vx a) (vx b)))
+       (abs (- (vy a) (vy b))))))
 
 (defmethod area ((shape circle))
   (* 1/2tau (square (radius shape))))
@@ -82,12 +83,12 @@
   t)
 
 (defmethod containsp ((shape circle) point)
-  (<= (distance point (center shape))
+  (<= (vdistance point (center shape))
       (radius shape)))
 
 (defun canvas-contains-p (point)
-  (and (<= 0 (x point) 1)
-       (<= 0 (y point) 1)))
+  (and (<= 0 (vx point) 1)
+       (<= 0 (vy point) 1)))
 
 (defun random-point-in-shape (shape)
   (iterate
@@ -125,5 +126,5 @@
         (flax.drawing:render canvas <>))
       (values shapes))))
 
-;; (time (loom 11 "out" :png 800 800))
+;; (time (loom 11 "out" :svg 800 800))
 ;; (time (loom 112 "out" :plot 800 800 :ratio 40000))
