@@ -6,7 +6,7 @@
 
 ;;;; Convert ------------------------------------------------------------------
 (defun convert-point (point x y)
-  (coord x (+ y point)))
+  (vec x (+ y point)))
 
 (defun convert-line (line y)
   (flax.drawing:path

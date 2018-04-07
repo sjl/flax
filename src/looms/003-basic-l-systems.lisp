@@ -72,9 +72,9 @@
 
 (defun convert-symbol (symbol x y)
   (flax.drawing:rectangle
-    (coord x y)
-    (coord (+ x (symbol-width symbol))
-           (+ y *cell-height*))
+    (vec x y)
+    (vec (+ x (symbol-width symbol))
+         (+ y *cell-height*))
     :color *brush*
     :round-corners (/ *cell-unit* 2)))
 
@@ -110,4 +110,4 @@
 
 
 
-;; (time (loom-anabaena-catenula nil "out" :svg 800 800))
+;; (time (loom nil "out" :svg 800 800))

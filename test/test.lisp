@@ -3,8 +3,10 @@
 (defun check (loom)
   (terpri)
   (losh:pr 'checking loom)
-  (funcall loom nil "out" (losh:random-elt '(:png :svg :plot)) 500 500)
-  (losh:pr 'ok))
+  (mapcar (lambda (output)
+            (funcall loom nil "out" output 500 500)
+            (losh:pr output 'OK))
+          '(:png :svg :plot)))
 
 (progn
   (check #'flax.looms.001-triangles:loom)

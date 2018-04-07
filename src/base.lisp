@@ -1,6 +1,6 @@
 (in-package :flax.base)
 
-;;;; Randomness ---------------------------------------------------------
+;;;; Randomness ---------------------------------------------------------------
 (defun rand (bound)
   (pcg:pcg-random t bound))
 
@@ -22,7 +22,7 @@
      ,@body))
 
 
-;;;; Math ---------------------------------------------------------
+;;;; Math ---------------------------------------------------------------------
 (defun round-to (number precision)
   "Round `number` to the given `precision`.
 
@@ -35,3 +35,4 @@
 
   "
   (* precision (round number precision)))
+

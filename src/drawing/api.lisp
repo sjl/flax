@@ -16,7 +16,7 @@
 
 
 ;;;; Utils --------------------------------------------------------------------
-(defun convert-coord (value dimension)
+(defun convert-coordinate (value dimension)
   (map-range (- *padding*) (1+ *padding*)
              0 dimension
              value))
@@ -33,8 +33,8 @@
                  (with-gensyms (coord)
                    (destructuring-bind (x-symbol y-symbol value) binding
                      `((,coord ,value)
-                       (,x-symbol (convert-coord (x ,coord) ,width))
-                       (,y-symbol (convert-coord (y ,coord) ,height))))))
+                       (,x-symbol (convert-coordinate (vx ,coord) ,width))
+                       (,y-symbol (convert-coordinate (vy ,coord) ,height))))))
                (parse-magnitude-binding (binding)
                  (destructuring-bind (magnitude-symbol value) binding
                    `((,magnitude-symbol (convert-magnitude ,canvas ,value)))))
@@ -48,7 +48,7 @@
 
 
 (defun coord-to-string (c)
-  (format nil "(~A, ~A)" (x c) (y c)))
+  (format nil "(~A, ~A)" (vx c) (vy c)))
 
 (defun coord-to-pair (canvas c)
   (with-coordinates canvas ((x y c))
@@ -81,9 +81,9 @@
 
 ;;;; Triangles ----------------------------------------------------------------
 (defclass* (triangle :conc-name "") (drawable)
-  ((a :type coord)
-   (b :type coord)
-   (c :type coord)))
+  ((a :type vec2)
+   (b :type vec2)
+   (c :type vec2)))
 
 (defun triangle (a b c &key (opacity 1.0d0) (color *black*))
   (make-instance 'triangle :a a :b b :c c
@@ -93,18 +93,18 @@
 (defmethod print-object ((o triangle) s)
   (print-unreadable-object (o s :type t :identity nil)
     (format s "(~D, ~D) (~D, ~D) (~D, ~D)"
-            (x (a o))
-            (y (a o))
-            (x (b o))
-            (y (b o))
-            (x (c o))
-            (y (c o)))))
+            (vx (a o))
+            (vy (a o))
+            (vx (b o))
+            (vy (b o))
+            (vx (c o))
+            (vy (c o)))))
 
 
 ;;;; Rectangles ---------------------------------------------------------------
 (defclass* (rectangle :conc-name "") (drawable)
-  ((a :type coord)
-   (b :type coord)
+  ((a :type vec2)
+   (b :type vec2)
    (round-corners :type float :initform 0.0)))
 
 (defun rectangle (a b &key (opacity 1.0d0) (color *black*) round-corners)
@@ -116,10 +116,10 @@
 (defmethod print-object ((o rectangle) s)
   (print-unreadable-object (o s :type t :identity nil)
     (format s "(~D, ~D) (~D, ~D)"
-            (x (a o))
-            (y (a o))
-            (x (b o))
-            (y (b o)))))
+            (vx (a o))
+            (vy (a o))
+            (vx (b o))
+            (vy (b o)))))
 
 (defun compute-corner-rounding (canvas rect)
   (if-let ((rounding (round-corners rect)))
@@ -132,7 +132,7 @@
 
 ;;;; Circles ------------------------------------------------------------------
 (defclass* (circle :conc-name "") (drawable)
-  ((center :type coord)
+  ((center :type vec2)
    (radius :type single-float)))
 
 (defun circle (center radius &key (opacity 1.0d0) (color *black*))
@@ -143,14 +143,14 @@
 (defmethod print-object ((o circle) s)
   (print-unreadable-object (o s :type t :identity nil)
     (format s "(~D, ~D) radius ~D"
-            (x (center o))
-            (y (center o))
+            (vx (center o))
+            (vy (center o))
             (radius o))))
 
 
 ;;;; Points -------------------------------------------------------------------
 (defclass* (point :conc-name "") (drawable)
-  ((location :type coord)))
+  ((location :type vec2)))
 
 (defun point (location &key (opacity 1.0d0) (color *black*))
   (make-instance 'point :location location
@@ -160,13 +160,13 @@
 (defmethod print-object ((o point) s)
   (print-unreadable-object (o s :type t :identity nil)
     (format s "(~D, ~D)"
-            (x (location o))
-            (y (location o)))))
+            (vx (location o))
+            (vy (location o)))))
 
 
 ;;;; Text ---------------------------------------------------------------------
 (defclass* (text :conc-name "") (drawable)
-  ((pos :type coord)
+  ((pos :type vec2)
    (font :type string)
    (size :type single-float)
    (align :type keyword)
@@ -184,8 +184,8 @@
   (print-unreadable-object (o s :type t :identity nil)
     (format s "~S (~D, ~D)"
             (content o)
-            (x (pos o))
-            (y (pos o)))))
+            (vx (pos o))
+            (vy (pos o)))))
 
 
 ;;;; Rendering ----------------------------------------------------------------

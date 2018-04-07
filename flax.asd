@@ -30,7 +30,6 @@
    (:module "src" :serial t
     :components
     ((:file "base")
-     (:file "coordinates")
      (:file "colors")
      (:module "drawing" :serial t
       :components ((:file "api")

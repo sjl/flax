@@ -18,8 +18,7 @@
 
 ;;;; Element Conversion -------------------------------------------------------
 (defun convert (line opacity)
-  (list (flax.drawing::path (iterate (for p :in-whatever (points line))
-                                     (collect (coord (vx p) (vy p))))
+  (list (flax.drawing::path (coerce (points line) 'list)
                             :color (hsv *hue* 0.9 1)
                             :opacity opacity)))
 

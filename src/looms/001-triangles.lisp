@@ -25,9 +25,7 @@
 ;;;; Element Conversion -------------------------------------------------------
 (defun convert-triangle (triangle)
   (with-triangle (triangle)
-    (flax.drawing:triangle (coord (vx a) (vy a))
-                           (coord (vx b) (vy b))
-                           (coord (vx c) (vy c)))))
+    (flax.drawing:triangle a b c)))
 
 (defun convert (universe)
   (mapcar #'convert-triangle universe))
@@ -108,4 +106,5 @@
       (values depth))))
 
 
-;; (time (loom nil "out" :svg 800 800))
+;; (declaim (optimize (debug 3)))
+;; (time (loom nil "out" :svg 800 800 :depth 12))

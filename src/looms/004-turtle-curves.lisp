@@ -26,9 +26,9 @@
 (defmethod perform-command (turtle (command (eql 'f)) n)
   (with-turtle (turtle)
     (list (flax.drawing:path
-            (list (coord x y)
+            (list (vec x y)
                   (progn (perform-command turtle 's n)
-                         (coord x y)))
+                         (vec x y)))
             :color *color*))))
 
 (defmethod perform-command (turtle (command (eql 'l)) n)
@@ -73,14 +73,14 @@
 (defun find-bounds (paths)
   (iterate (for path :in paths)
            (for (p1 p2) = (flax.drawing:points path))
-           (maximizing (x p1) :into max-x)
-           (maximizing (x p2) :into max-x)
-           (maximizing (y p1) :into max-y)
-           (maximizing (y p2) :into max-y)
-           (minimizing (x p1) :into min-x)
-           (minimizing (x p2) :into min-x)
-           (minimizing (y p1) :into min-y)
-           (minimizing (y p2) :into min-y)
+           (maximizing (vx p1) :into max-x)
+           (maximizing (vx p2) :into max-x)
+           (maximizing (vy p1) :into max-y)
+           (maximizing (vy p2) :into max-y)
+           (minimizing (vx p1) :into min-x)
+           (minimizing (vx p2) :into min-x)
+           (minimizing (vy p1) :into min-y)
+           (minimizing (vy p2) :into min-y)
            (finally (return (list min-x min-y max-x max-y)))))
 
 (defun scale (paths)
@@ -94,10 +94,10 @@
     (for path :in paths)
     (for (p1 p2) = (flax.drawing:points path))
     (zapf
-      (x p1) (map-range min-x max-x x-padding (- 1.0 x-padding) %)
-      (y p1) (map-range min-y max-y y-padding (- 1.0 y-padding) %)
-      (x p2) (map-range min-x max-x x-padding (- 1.0 x-padding) %)
-      (y p2) (map-range min-y max-y y-padding (- 1.0 y-padding) %)))
+      (vx p1) (map-range min-x max-x x-padding (- 1.0 x-padding) %)
+      (vy p1) (map-range min-y max-y y-padding (- 1.0 y-padding) %)
+      (vx p2) (map-range min-x max-x x-padding (- 1.0 x-padding) %)
+      (vy p2) (map-range min-y max-y y-padding (- 1.0 y-padding) %)))
   paths)
 
 
@@ -312,9 +312,9 @@
 
 
 
-;; (time (loom 12 "out" :plot 800 800
+;; (time (loom nil "out" :svg 800 800
 ;;             ;; :l-system *hexagonal-gosper-curve*
-;;             :iterations 5 
+;;             ;; :iterations 5 
 ;;             ;; :starting-angle (- 1/4tau)
 ;;             ))
 

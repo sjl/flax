@@ -3,8 +3,7 @@
 
 ;;;; Convert ------------------------------------------------------------------
 (defun convert (points)
-  (iterate (for p :in points)
-           (collect (flax.drawing:point (coord (vx p) (vy p))))))
+  (mapcar #'flax.drawing:point points))
 
 
 ;;;; Shapes -------------------------------------------------------------------
@@ -127,4 +126,4 @@
       (values shapes))))
 
 ;; (time (loom 11 "out" :svg 800 800))
-;; (time (loom 112 "out" :plot 800 800 :ratio 40000))
+;; (time (loom 112 "out" :png 800 800 :ratio 4000000))

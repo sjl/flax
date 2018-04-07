@@ -5,17 +5,13 @@
 (defparameter *point-size* 0.003)
 
 (defun convert-point (point)
-  (flax.drawing:circle (coord (vx point) (vy point))
-                       (random-gaussian *point-size*
+  (flax.drawing:circle point (random-gaussian *point-size*
                                               (* 0.15 *point-size*)
                                               #'rand)))
 
 (defun convert-triangle (ratio tri)
   (when (randomp ratio #'rand)
-    (destructuring-bind (a b c) tri
-      (list (flax.drawing:triangle (coord (vx a) (vy a))
-                                   (coord (vx b) (vy b))
-                                   (coord (vx c) (vy c)))))))
+    (list (apply #'flax.drawing:triangle tri))))
 
 (defun convert (points ratio)
   (append
