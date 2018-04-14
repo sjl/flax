@@ -1,14 +1,32 @@
 (in-package :flax.drawing)
 
 ;;;; Parameters ---------------------------------------------------------------
-(defparameter *padding* 0.03)
 (defparameter *black* (rgb 0 0 0))
 (defparameter *white* (rgb 1 1 1))
 
 
 ;;;; Canvas -------------------------------------------------------------------
 (defclass* (canvas :conc-name "") ()
-  (width height))
+  ((width :type (integer 0))
+   (height :type (integer 0))
+   (padding :type (single-float 0.0 0.5) :initform 0.03)
+   (output-transformation :type mat3)))
+
+(defun recompute-output-transformation (canvas)
+  (let* ((fw (coerce (width canvas) 'single-float))
+         (fh (coerce (height canvas) 'single-float))
+         (p (padding canvas))
+         (pw (* p fw))
+         (ph (* p fh))
+         (w (- fw pw pw))
+         (h (- fh ph ph)))
+    (setf (output-transformation canvas)
+          (transformation
+            (scale w h)
+            (translate pw ph)))))
+
+(defmethod initialize-instance :after ((canvas canvas) &key)
+  (recompute-output-transformation canvas))
 
 (define-with-macro (canvas :conc-name "") width height)
 
@@ -16,35 +34,34 @@
 
 
 ;;;; Utils --------------------------------------------------------------------
-(defun convert-coordinate (value dimension)
-  (map-range (- *padding*) (1+ *padding*)
-             0 dimension
-             value))
+(defun-inline homogenize (v)
+  (vec3 (vx v) (vy v) 1))
+
+(defun convert-coordinate (canvas coordinate)
+  (let ((c (m* (output-transformation canvas) coordinate)))
+    (values (vx3 c) (vy3 c))))
 
 (defun convert-magnitude (canvas magnitude)
-  (let ((dim (min (height canvas) (width canvas))))
-    (lerp 0 (- dim (* 2 *padding* dim)) magnitude)))
+  (ntransform magnitude (output-transformation canvas)))
 
+
+(defmacro with-coordinate (canvas-symbol binding &body body)
+  (ecase (length binding)
+    (2 (destructuring-bind (magnitude-symbol value) binding
+         `(let ((,magnitude-symbol (convert-magnitude ,canvas-symbol ,value)))
+            ,@body)))
+    (3 (destructuring-bind (x-symbol y-symbol value) binding
+         `(multiple-value-bind (,x-symbol ,y-symbol)
+            (convert-coordinate ,canvas-symbol ,value)
+            ,@body)))))
 
 (defmacro with-coordinates (canvas bindings &body body)
   (once-only (canvas)
-    (with-gensyms (width height)
-      (labels ((parse-coord-binding (binding)
-                 (with-gensyms (coord)
-                   (destructuring-bind (x-symbol y-symbol value) binding
-                     `((,coord ,value)
-                       (,x-symbol (convert-coordinate (vx ,coord) ,width))
-                       (,y-symbol (convert-coordinate (vy ,coord) ,height))))))
-               (parse-magnitude-binding (binding)
-                 (destructuring-bind (magnitude-symbol value) binding
-                   `((,magnitude-symbol (convert-magnitude ,canvas ,value)))))
-               (parse-binding (binding)
-                 (ecase (length binding)
-                   (2 (parse-magnitude-binding binding))
-                   (3 (parse-coord-binding binding)))))
-        `(with-canvas (,canvas ,width ,height)
-           (let* ,(mapcan #'parse-binding bindings)
-             ,@body))))))
+    `(nest
+       ,@(mapcar (lambda (binding)
+                   `(with-coordinate ,canvas ,binding))
+                 bindings)
+       (progn ,@body))))
 
 
 (defun coord-to-string (c)
@@ -69,7 +86,7 @@
 
 (defun path (points &key (opacity 1.0d0) (color *black*))
   (make-instance 'path
-    :points points
+    :points (mapcar #'homogenize points)
     :color color
     :opacity (coerce opacity 'double-float)))
 
@@ -78,15 +95,20 @@
     (format s "~{~A~^ -> ~}"
             (mapcar #'coord-to-string (points o)))))
 
+(defmethod ntransform ((path path) transformation)
+  (dolist (p (points path))
+    (ntransform p transformation))
+  path)
+
 
 ;;;; Triangles ----------------------------------------------------------------
 (defclass* (triangle :conc-name "") (drawable)
-  ((a :type vec2)
-   (b :type vec2)
-   (c :type vec2)))
+  ((a :type vec3)
+   (b :type vec3)
+   (c :type vec3)))
 
 (defun triangle (a b c &key (opacity 1.0d0) (color *black*))
-  (make-instance 'triangle :a a :b b :c c
+  (make-instance 'triangle :a (homogenize a) :b (homogenize b) :c (homogenize c)
                  :color color
                  :opacity (coerce opacity 'double-float)))
 
@@ -100,15 +122,21 @@
             (vx (c o))
             (vy (c o)))))
 
+(defmethod ntransform ((triangle triangle) transformation)
+  (ntransform (a triangle))
+  (ntransform (b triangle))
+  (ntransform (c triangle))
+  triangle)
+
 
 ;;;; Rectangles ---------------------------------------------------------------
 (defclass* (rectangle :conc-name "") (drawable)
-  ((a :type vec2)
-   (b :type vec2)
+  ((a :type vec3)
+   (b :type vec3)
    (round-corners :type float :initform 0.0)))
 
 (defun rectangle (a b &key (opacity 1.0d0) (color *black*) round-corners)
-  (make-instance 'rectangle :a a :b b
+  (make-instance 'rectangle :a (homogenize a) :b (homogenize b)
     :color color
     :opacity (coerce opacity 'double-float)
     :round-corners round-corners))
@@ -125,18 +153,24 @@
   (if-let ((rounding (round-corners rect)))
     (with-canvas (canvas)
       (* rounding
-         (* (- 1.0 *padding* *padding*)
+         (* (- 1.0 (* 2 (padding canvas)))
             (min height width))))
     0))
+
+(defmethod ntransform ((rectangle rectangle) transformation)
+  (ntransform (a rectangle))
+  (ntransform (b rectangle))
+  (callf (round-corners rectangle) #'ntransform)
+  rectangle)
 
 
 ;;;; Circles ------------------------------------------------------------------
 (defclass* (circle :conc-name "") (drawable)
-  ((center :type vec2)
+  ((center :type vec3)
    (radius :type single-float)))
 
 (defun circle (center radius &key (opacity 1.0d0) (color *black*))
-  (make-instance 'circle :center center :radius radius
+  (make-instance 'circle :center (homogenize center) :radius radius
     :color color
     :opacity (coerce opacity 'double-float)))
 
@@ -147,13 +181,18 @@
             (vy (center o))
             (radius o))))
 
+(defmethod ntransform ((circle circle) transformation)
+  (ntransform (center circle))
+  (callf (radius circle) #'ntransform)
+  circle)
+
 
 ;;;; Points -------------------------------------------------------------------
 (defclass* (point :conc-name "") (drawable)
-  ((location :type vec2)))
+  ((location :type vec3)))
 
 (defun point (location &key (opacity 1.0d0) (color *black*))
-  (make-instance 'point :location location
+  (make-instance 'point :location (homogenize location)
     :color color
     :opacity (coerce opacity 'double-float)))
 
@@ -163,10 +202,14 @@
             (vx (location o))
             (vy (location o)))))
 
+(defmethod ntransform ((point point) transformation)
+  (ntransform (location point))
+  point)
+
 
 ;;;; Text ---------------------------------------------------------------------
 (defclass* (text :conc-name "") (drawable)
-  ((pos :type vec2)
+  ((pos :type vec3)
    (font :type string)
    (size :type single-float)
    (align :type keyword)
@@ -175,7 +218,7 @@
 (defun text (position size font content
              &key (opacity 1.0d0) (color *black*) (align :left))
   (make-instance 'text
-    :pos position :size size :font font :content content
+    :pos (homogenize position) :size size :font font :content content
     :align align
     :color color
     :opacity (coerce opacity 'double-float)))
@@ -186,6 +229,11 @@
             (content o)
             (vx (pos o))
             (vy (pos o)))))
+
+(defmethod ntransform ((text text) transformation)
+  (ntransform (pos text))
+  (callf (size text) #'ntransform)
+  text)
 
 
 ;;;; Rendering ----------------------------------------------------------------
@@ -221,8 +269,8 @@
        (let ((,canvas-symbol (make-canvas ,canvas-type
                                           :height ,height
                                           :width ,width
-                                          :background ,background))
-             (*padding* ,padding))
+                                          :padding ,padding
+                                          :background ,background)))
          (multiple-value-prog1 ,@body
            (write-file ,canvas-symbol (full-filename ,filename ,canvas-type)))))))
 

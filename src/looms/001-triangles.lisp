@@ -106,5 +106,5 @@
       (values depth))))
 
 
-;; (declaim (optimize (debug 3)))
-;; (time (loom nil "out" :svg 800 800 :depth 12))
+;; (declaim (optimize (speed 1)))
+;; (time (loom nil "out" :svg 800 800 :depth 16))

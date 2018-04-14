@@ -81,24 +81,20 @@
            (minimizing (vx p2) :into min-x)
            (minimizing (vy p1) :into min-y)
            (minimizing (vy p2) :into min-y)
-           (finally (return (list min-x min-y max-x max-y)))))
+           (finally (return (values min-x min-y max-x max-y)))))
 
-(defun scale (paths)
-  (iterate
-    ;; (with aspect = 1)
-    (with (min-x min-y max-x max-y)  = (find-bounds paths))
-    (with factor = (min (/ (- max-x min-x))
-                        (/ (- max-y min-y))))
-    (with x-padding = (/ (- 1.0 (* factor (- max-x min-x))) 2))
-    (with y-padding = (/ (- 1.0 (* factor (- max-y min-y))) 2))
-    (for path :in paths)
-    (for (p1 p2) = (flax.drawing:points path))
-    (zapf
-      (vx p1) (map-range min-x max-x x-padding (- 1.0 x-padding) %)
-      (vy p1) (map-range min-y max-y y-padding (- 1.0 y-padding) %)
-      (vx p2) (map-range min-x max-x x-padding (- 1.0 x-padding) %)
-      (vy p2) (map-range min-y max-y y-padding (- 1.0 y-padding) %)))
-  paths)
+(defun transform-to-fit (paths)
+  (multiple-value-bind (min-x min-y max-x max-y) (find-bounds paths)
+    (let* ((x-span (- max-x min-x))
+           (y-span (- max-y min-y))
+           (factor (min (/ x-span) (/ y-span)))
+           (x-padding (/ (- 1.0 (* factor x-span)) 2.0))
+           (y-padding (/ (- 1.0 (* factor y-span)) 2.0))
+           (transform (transformation
+                        (translate (- min-x) (- min-y))
+                        (scale factor factor)
+                        (translate x-padding y-padding))))
+      (ntransform paths transform))))
 
 
 (defun encode (commands)
@@ -304,7 +300,7 @@
     (progn
       (-<> (run-l-system axiom productions iterations)
         turtle-draw
-        scale
+        transform-to-fit
         (flax.drawing:render canvas <>))
       (values (l-system-name l-system)
               iterations
@@ -312,7 +308,7 @@
 
 
 
-;; (time (loom nil "out" :svg 800 800
+;; (profile (loom 1963517098 "out" :png 800 800
 ;;             ;; :l-system *hexagonal-gosper-curve*
 ;;             ;; :iterations 5 
 ;;             ;; :starting-angle (- 1/4tau)

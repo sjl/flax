@@ -31,6 +31,7 @@
     :components
     ((:file "base")
      (:file "colors")
+     (:file "transform")
      (:module "drawing" :serial t
       :components ((:file "api")
                    (:file "png")

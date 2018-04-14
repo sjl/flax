@@ -1,5 +1,7 @@
 (defpackage :flax.base
-  (:use :cl :iterate :losh :flax.quickutils)
+  (:use :cl :iterate :losh :flax.quickutils
+        :3d-vectors
+        :3d-matrices)
   (:export
     :rand
     :with-seed
@@ -15,10 +17,23 @@
     :hsv
     :rgb))
 
+(defpackage :flax.transform
+  (:use :cl :iterate :losh :flax.base :flax.quickutils
+    :3d-vectors
+    :3d-matrices)
+  (:export
+    :transformation
+    :scale
+    :rotate
+    :translate
+    :ntransform))
+
 (defpackage :flax.drawing
   (:use :cl :iterate :losh :flax.base :flax.quickutils
     :flax.colors
-    :3d-vectors)
+    :flax.transform
+    :3d-vectors
+    :3d-matrices)
   (:export
     :with-rendering
     :render
@@ -52,6 +67,7 @@
 (defpackage :flax.looms.004-turtle-curves
   (:use :cl :iterate :losh :flax.base :flax.quickutils
     :flax.colors
+    :flax.transform
     :3d-vectors)
   (:export :loom))
 
