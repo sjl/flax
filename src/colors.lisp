@@ -47,15 +47,3 @@
                 (coerce s 'double-float)
                 (coerce v 'double-float))))
 
-
-(defun blend! (destination color alpha)
-  (declare (optimize speed)
-           (type color destination color)
-           (type color-float alpha))
-  (with-color (destination dr dg db)
-    (with-color (color r g b)
-      (setf dr (lerp dr r alpha)
-            dg (lerp dg g alpha)
-            db (lerp db b alpha))))
-  (values))
-
