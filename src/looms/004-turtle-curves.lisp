@@ -23,6 +23,9 @@
 
 (defgeneric perform-command (turtle command n))
 
+(defmethod perform-command (turtle command n)
+  nil)
+
 (defmethod perform-command (turtle (command (eql 'f)) n)
   (with-turtle (turtle)
     (list (flax.drawing:path
@@ -31,10 +34,7 @@
                          (vec x y)))
             :color *color*))))
 
-(defmethod perform-command (turtle (command (eql 'l)) n)
-  (perform-command turtle 'f n))
-
-(defmethod perform-command (turtle (command (eql 'r)) n)
+(defmethod perform-command (turtle (command integer) n)
   (perform-command turtle 'f n))
 
 (defmethod perform-command (turtle (command (eql 's)) n)
@@ -44,15 +44,16 @@
       (incf y (* *step* (sin angle)))))
   nil)
 
-(defmethod perform-command (turtle (command (eql 'x)) n)
-  nil)
-
 (defmethod perform-command (turtle (command (eql '-)) n)
   (rotf (turtle-angle turtle) (* n *angle*))
   nil)
 
 (defmethod perform-command (turtle (command (eql '+)) n)
   (rotf (turtle-angle turtle) (* n (- *angle*)))
+  nil)
+
+(defmethod perform-command (turtle (command (eql '%)) n)
+  (rotf (turtle-angle turtle) 1/2tau)
   nil)
 
 (defmethod perform-command (turtle (command (eql '<)) n)
@@ -68,6 +69,12 @@
         (destructuring-bind (ox oy oa) prev
           (setf x ox y oy angle oa)))))
   nil)
+
+(defmethod perform-command (turtle (command (eql '[)) n)
+  (perform-command turtle '< n))
+
+(defmethod perform-command (turtle (command (eql '])) n)
+  (perform-command turtle '> n))
 
 
 (defun find-bounds (paths)
@@ -124,6 +131,11 @@
     (for word :initially axiom :then (expand word productions))
     (finally (return word))))
 
+(defun run-named-l-system (l-system iterations)
+  (run-l-system (l-system-axiom l-system)
+                (l-system-productions l-system)
+                iterations))
+
 
 (defclass* l-system ()
   ((name)
@@ -177,17 +189,17 @@
 (define-l-system unnamed-koch-f (f - f - f - f)
   f (f - f + f - f - f))
 
-(define-l-system dragon-curve l
-  l (l + r +)
-  r (- l - r))
+(define-l-system dragon-curve 1
+  1 (1 + 2 +)
+  2 (- 1 - 2))
 
-(define-l-system (sierpinski-gasket :angle (/ tau 6)) r
-  l (r + l + r)
-  r (l - r - l))
+(define-l-system (sierpinski-gasket :angle (/ tau 6)) 2
+  1 (2 + 1 + 2)
+  2 (1 - 2 - 1))
 
-(define-l-system (hexagonal-gosper-curve :angle (/ tau 6)) l
-  l (l + r + + r - l - - l l - r +)
-  r (- l + r r + + r + l - - l - r))
+(define-l-system (hexagonal-gosper-curve :angle (/ tau 6)) 1
+  1 (1 + 2 + + 2 - 1 - - 1 1 - 2 +)
+  2 (- 1 + 2 2 + + 2 + 1 - - 1 - 2))
 
 
 (define-l-system (tree-a :angle (radians 25.7)) f
@@ -212,6 +224,65 @@
   f (f f))
 
 
+;;; http://paulbourke.net/fractals/lsys/
+
+(define-l-system (saupe-pine :angle (radians 20)) (v z f f f)
+  v (< + + + w > < - - - w > y v)
+  w (+ x < - w > z)
+  x (- w < + x > z)
+  y (y z)
+  z (< - f f f > < + f f f > f))
+
+(define-l-system (bourke-bush :angle (radians 25.7)) y
+  x (x < - f f f > < + f f f > f x)
+  y (y f x < + y > < - y >))
+
+(define-l-system (bourke-weed :angle (radians 22.5)) f
+  f (f f - < x y > + < x y >)
+  x (+ f y)
+  y (- f x))
+
+(define-l-system (bourke-triangle :angle (radians 120)) (f + f + f)
+  f (f - f + f))
+
+(define-l-system (bourke-pentaplexity :angle (radians 36)) (F + + F + + F + + F + + F)
+  f (f + + f + + f % f - f + + f))
+
+(define-l-system (bourke-mango :angle (radians 60)) (Y - - - Y)
+  x (f - f f - f - - < - - x > f - f f - f - - f - f f - f - -)
+  y (s - f + x + f - s y))
+
+(define-l-system (square-sierpinski :angle (radians 90)) (f + x f + f + x f)
+  x (x f - f + f - x f + f + x f - f + f - x))
+
+(define-l-system (peano-curve :angle (radians 90)) x
+  x (x f y f x + f + y f x f y - f - x f y f x)
+  y (y f x f y - f - x f y f x + f + y f x f y))
+
+(define-l-system (hilbert-curve :angle (radians 90)) x
+  x (- y f + x f x + f y -)
+  y (+ x f - y f y - f x +))
+
+(define-l-system (quadratic-gosper :angle (radians 90)) (- y f)
+  x (x f x - y f - y f + f x + f x - y f - y f f x + y f + f x f x y f -
+     f x + y f + f x f x + y f - f x y f - y f - f x + f x + y f y f -)
+  y (+ f x f x - y f - y f + f x + f x y f + f x - y f y f - f x - y f +
+     f x y f y f - f x - y f f x + f x + y f - y f - f x + f x + y f y))
+
+(define-l-system (lévy-curve :angle (radians 45)) f
+  f (- f + + f -))
+
+
+;;; http://www.kevs3d.co.uk/dev/lsystems/
+
+(define-l-system (penrose :angle (radians 36))
+    ([ 7 ] + + [ 7 ] + + [ 7 ] + + [ 7 ] + + [ 7 ])
+  6 (8 x + + 9 x - - - - 7 x [ - 8 x - - - - 6 x ] + +)
+  7 (+ 8 x - - 9 x [ - - - 6 x - - 7 x ] +)
+  8 (- 6 x + + 7 x [ + + + 8 x + + 9 x ] -)
+  9 (- - 8 x + + + + 6 x [ + 9 x + + + + 7 x ] - - 7 x)
+  x ())
+
 
 ;;;; Mutation -----------------------------------------------------------------
 (defun insert (val target n)
@@ -219,6 +290,8 @@
           (list val)
           (subseq target n)))
 
+(defun remove-nth (list n)
+  (concatenate 'list (subseq list 0 n) (subseq list (1+ n))))
 
 (defun mutation-transpose (result)
   (rotatef (elt result (rand (length result)))
@@ -226,21 +299,33 @@
   result)
 
 (defun mutation-insert (result)
-  (zapf result (insert (random-elt result #'rand)
+  (zapf result (insert (random-elt (union (remove-duplicates result)
+                                          '(f s - + < > %))
+                                   #'rand)
                        %
                        (rand (length result))))
   result)
 
+(defun mutation-remove (result)
+  (remove-nth result (rand (length result))))
+
 (defun mutate-production (result)
   (if (<= (length result) 2)
     result
-    (ecase (rand 2)
+    (ecase (rand 3)
       (0 (mutation-transpose result))
-      (1 (mutation-insert result)))))
+      (1 (mutation-insert result))
+      (2 (mutation-remove result)))))
 
-(defun mutate-productions (productions)
+(defun mutate-productions% (productions)
   (iterate (for (letter production . nil) :on productions :by #'cddr)
            (appending (list letter (mutate-production (copy-list production))))))
+
+(defun mutate-productions (productions)
+  (iterate
+    ;; complete no-op mutations are boring
+    (for new = (mutate-productions% productions))
+    (finding new :such-that (not (equal new productions)))))
 
 (defun maybe-mutate-productions (productions)
   (let ((should-mutate (randomp 0.6 #'rand))
@@ -266,17 +351,30 @@
                 (,*dragon-curve* 7 16)
                 (,*sierpinski-gasket* 4 10)
                 (,*hexagonal-gosper-curve* 3 6)
+                (,*bourke-triangle* 4 8)
+                (,*bourke-pentaplexity* 3 5)
+                (,*bourke-mango* 3 25)
+                (,*square-sierpinski* 3 6)
+                (,*peano-curve* 3 5)
+                (,*hilbert-curve* 5 7)
+                (,*quadratic-gosper* 2 3)
+                (,*lévy-curve* 6 14)
+                (,*penrose* 3 7)
                 (,*tree-a* 3 7 ,(- 1/4tau))
                 (,*tree-b* 3 7 ,(- 1/4tau))
                 (,*tree-c* 3 5 ,(- 1/4tau))
                 (,*tree-d* 6 7 ,(- 1/4tau))
                 (,*tree-e* 6 8 ,(- 1/4tau))
-                (,*tree-f* 4 7 ,(- 1/4tau)))
+                (,*tree-f* 4 7 ,(- 1/4tau))
+                (,*saupe-pine* 7 12 ,(- 1/4tau))
+                (,*bourke-bush* 5 7 ,(- 1/4tau))
+                (,*bourke-weed* 5 8 ,(- 1/4tau))
+                )
               #'rand))
 
 
 (defun loom (seed filename filetype width height
-             &key l-system iterations starting-angle)
+             &key l-system iterations starting-angle pure)
   (nest
     (with-seed seed)
     (destructuring-bind
@@ -294,7 +392,9 @@
            (axiom (l-system-axiom l-system))
            (*angle* (l-system-recommended-angle l-system))))
     (multiple-value-bind (productions mutagen)
-        (maybe-mutate-productions (l-system-productions l-system)))
+        (if pure
+          (values (l-system-productions l-system) nil)
+          (maybe-mutate-productions (l-system-productions l-system))))
     (flax.drawing:with-rendering
         (canvas filetype filename width height :background bg :padding 0.05))
     (progn
@@ -305,12 +405,4 @@
       (values (l-system-name l-system)
               iterations
               mutagen))))
-
-
-
-;; (profile (loom 1963517098 "out" :png 800 800
-;;             ;; :l-system *hexagonal-gosper-curve*
-;;             ;; :iterations 5 
-;;             ;; :starting-angle (- 1/4tau)
-;;             ))
 
