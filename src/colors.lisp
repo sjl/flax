@@ -11,7 +11,7 @@
   (g 0.0d0 :type color-float)
   (b 0.0d0 :type color-float))
 
-(define-with-macro (color :conc-name "") r g b)
+(define-with-macro color r g b)
 
 (defun rgb (r g b)
   (make-color (coerce r 'double-float)

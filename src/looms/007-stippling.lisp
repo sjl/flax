@@ -11,8 +11,8 @@
 (defstruct (circle (:conc-name nil)) center radius)
 
 
-(define-with-macro (rectangle :conc-name "") a b)
-(define-with-macro (circle :conc-name "") center radius)
+(define-with-macro rectangle a b)
+(define-with-macro circle center radius)
 
 
 (defun random-coord ()

@@ -6,7 +6,7 @@
 
 
 ;;;; Canvas -------------------------------------------------------------------
-(defclass* (canvas :conc-name "") ()
+(defclass* canvas ()
   ((width :type (integer 0))
    (height :type (integer 0))
    (padding :type (single-float 0.0 0.5) :initform 0.03)
@@ -28,7 +28,7 @@
 (defmethod initialize-instance :after ((canvas canvas) &key)
   (recompute-output-transformation canvas))
 
-(define-with-macro (canvas :conc-name "") width height)
+(define-with-macro canvas width height)
 
 (defgeneric make-canvas (type &key &allow-other-keys))
 
@@ -73,7 +73,7 @@
 
 
 ;;;; Drawables ----------------------------------------------------------------
-(defclass* (drawable :conc-name "") ()
+(defclass* drawable ()
   ((opacity :type (double-float 0.0d0 1.0d0))
    (color :type color)))
 
@@ -81,7 +81,7 @@
 
 
 ;;;; Paths --------------------------------------------------------------------
-(defclass* (path :conc-name "") (drawable)
+(defclass* path (drawable)
   ((points :type list)))
 
 (defun path (points &key (opacity 1.0d0) (color *black*))
@@ -102,7 +102,7 @@
 
 
 ;;;; Triangles ----------------------------------------------------------------
-(defclass* (triangle :conc-name "") (drawable)
+(defclass* triangle (drawable)
   ((a :type vec3)
    (b :type vec3)
    (c :type vec3)))
@@ -130,7 +130,7 @@
 
 
 ;;;; Rectangles ---------------------------------------------------------------
-(defclass* (rectangle :conc-name "") (drawable)
+(defclass* rectangle (drawable)
   ((a :type vec3)
    (b :type vec3)
    (round-corners :type float :initform 0.0)))
@@ -165,7 +165,7 @@
 
 
 ;;;; Circles ------------------------------------------------------------------
-(defclass* (circle :conc-name "") (drawable)
+(defclass* circle (drawable)
   ((center :type vec3)
    (radius :type single-float)))
 
@@ -188,7 +188,7 @@
 
 
 ;;;; Points -------------------------------------------------------------------
-(defclass* (point :conc-name "") (drawable)
+(defclass* point (drawable)
   ((location :type vec3)))
 
 (defun point (location &key (opacity 1.0d0) (color *black*))
@@ -208,7 +208,7 @@
 
 
 ;;;; Text ---------------------------------------------------------------------
-(defclass* (text :conc-name "") (drawable)
+(defclass* text (drawable)
   ((pos :type vec3)
    (font :type string)
    (size :type single-float)

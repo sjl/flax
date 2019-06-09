@@ -26,10 +26,10 @@
                  (:file "quickutils")
                  (:module "lofi-tri"
                   :components ((:file "lofi.tri")))))
-   (:file "package")
    (:module "src" :serial t
     :components
-    ((:file "base")
+    ((:file "package")
+     (:file "base")
      (:file "colors")
      (:file "transform")
      (:module "drawing" :serial t

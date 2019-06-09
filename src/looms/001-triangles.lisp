@@ -11,12 +11,12 @@
 
 
 ;;;; Elements -----------------------------------------------------------------
-(defstruct (triangle (:conc-name ""))
+(defstruct (triangle (:conc-name nil))
   (a (vec 0 0) :type vec2)
   (b (vec 0 0) :type vec2)
   (c (vec 0 0) :type vec2))
 
-(define-with-macro (triangle :conc-name "") a b c)
+(define-with-macro triangle a b c)
 
 (defun triangle (a b c)
   (make-triangle :a a :b b :c c))

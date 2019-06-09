@@ -4,7 +4,7 @@
 ;;; TODO: shell out to svgsort automatically?
 
 
-(defclass* (plot-canvas :conc-name "") (svg-canvas) ())
+(defclass* plot-canvas (svg-canvas) ())
 
 (defmethod make-canvas ((type (eql :plot)) &key height width)
   (let ((scene (svg:make-svg-toplevel 'svg:svg-1.1-toplevel

@@ -12,7 +12,7 @@
   (angle *starting-angle*)
   (state nil))
 
-(define-with-macro turtle x y angle state)
+(define-with-macro (turtle :conc-name turtle-) x y angle state)
 
 
 (defun rot (angle amount)
@@ -132,8 +132,8 @@
     (finally (return word))))
 
 (defun run-named-l-system (l-system iterations)
-  (run-l-system (l-system-axiom l-system)
-                (l-system-productions l-system)
+  (run-l-system (axiom l-system)
+                (productions l-system)
                 iterations))
 
 
@@ -389,12 +389,12 @@
            (*color* (hsv (rand 1.0)
                          (random-range 0.5 0.8 #'rand)
                          (random-range 0.9 1.0 #'rand)))
-           (axiom (l-system-axiom l-system))
-           (*angle* (l-system-recommended-angle l-system))))
+           (axiom (axiom l-system))
+           (*angle* (recommended-angle l-system))))
     (multiple-value-bind (productions mutagen)
         (if pure
-          (values (l-system-productions l-system) nil)
-          (maybe-mutate-productions (l-system-productions l-system))))
+          (values (productions l-system) nil)
+          (maybe-mutate-productions (productions l-system))))
     (flax.drawing:with-rendering
         (canvas filetype filename width height :background bg :padding 0.05))
     (progn
@@ -402,7 +402,7 @@
         turtle-draw
         transform-to-fit
         (flax.drawing:render canvas <>))
-      (values (l-system-name l-system)
+      (values (name l-system)
               iterations
               mutagen))))
 

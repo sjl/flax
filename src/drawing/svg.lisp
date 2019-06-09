@@ -10,7 +10,7 @@
 
 
 ;;;; Canvas -------------------------------------------------------------------
-(defclass* (svg-canvas :conc-name "") (canvas)
+(defclass* svg-canvas (canvas)
   (scene))
 
 (defmethod make-canvas ((type (eql :svg)) &key height width background)

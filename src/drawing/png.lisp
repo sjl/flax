@@ -43,7 +43,7 @@
 
 
 ;;;; Canvas -------------------------------------------------------------------
-(defclass* (png-canvas :conc-name "") (canvas)
+(defclass* png-canvas (canvas)
   (image state))
 
 (defmethod make-canvas ((type (eql :png)) &key height width background)

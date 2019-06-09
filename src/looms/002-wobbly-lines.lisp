@@ -9,12 +9,11 @@
 
 
 ;;;; Elements -----------------------------------------------------------------
-(defstruct (line (:conc-name "")
+(defstruct (line (:conc-name nil)
                  (:constructor line (points)))
   (points (error "Required") :type vector))
 
-(define-with-macro (line :conc-name "") points)
-
+(define-with-macro line points)
 
 ;;;; Element Conversion -------------------------------------------------------
 (defun convert (line opacity)
