@@ -13,7 +13,7 @@
 (defclass* svg-canvas (canvas)
   (scene))
 
-(defmethod make-canvas ((type (eql :svg)) &key height width background)
+(defmethod make-canvas ((type (eql :svg)) &key height width background padding)
   (let ((scene (svg:make-svg-toplevel 'svg:svg-1.1-toplevel
                                       :height height :width width)))
     (svg:draw scene (:rect :x 0 :y 0 :width width :height height
@@ -21,7 +21,8 @@
     (make-instance 'svg-canvas
       :height height
       :width width
-      :scene scene)))
+      :scene scene
+      :padding padding)))
 
 
 ;;;; Rectangles ---------------------------------------------------------------

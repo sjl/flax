@@ -46,11 +46,12 @@
 (defclass* png-canvas (canvas)
   (image state))
 
-(defmethod make-canvas ((type (eql :png)) &key height width background)
+(defmethod make-canvas ((type (eql :png)) &key height width background padding)
   (make-instance 'png-canvas
     :height height
     :width width
-    :image (make-image width height background)))
+    :image (make-image width height background)
+    :padding padding))
 
 
 ;;;; Rectangles ---------------------------------------------------------------

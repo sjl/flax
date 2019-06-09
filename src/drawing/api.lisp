@@ -7,23 +7,18 @@
 
 ;;;; Canvas -------------------------------------------------------------------
 (defclass* canvas ()
-  ((width :type (integer 0))
-   (height :type (integer 0))
+  ((width :type (integer 1))
+   (height :type (integer 1))
    (padding :type (single-float 0.0 0.5) :initform 0.03)
    (output-transformation :type mat3)))
 
 (defun recompute-output-transformation (canvas)
-  (let* ((fw (coerce (width canvas) 'single-float))
-         (fh (coerce (height canvas) 'single-float))
-         (p (padding canvas))
-         (pw (* p fw))
-         (ph (* p fh))
-         (w (- fw pw pw))
-         (h (- fh ph ph)))
-    (setf (output-transformation canvas)
-          (transformation
-            (scale w h)
-            (translate pw ph)))))
+  (setf (output-transformation canvas)
+        (transformation
+          (place (vec 0 0)
+                 (vec (coerce (width canvas) 'single-float)
+                      (coerce (height canvas) 'single-float))
+                 :padding (padding canvas)))))
 
 (defmethod initialize-instance :after ((canvas canvas) &key)
   (recompute-output-transformation canvas))
@@ -123,9 +118,9 @@
             (vy (c o)))))
 
 (defmethod ntransform ((triangle triangle) transformation)
-  (ntransform (a triangle))
-  (ntransform (b triangle))
-  (ntransform (c triangle))
+  (ntransform (a triangle) transformation)
+  (ntransform (b triangle) transformation)
+  (ntransform (c triangle) transformation)
   triangle)
 
 
@@ -139,7 +134,7 @@
   (make-instance 'rectangle :a (homogenize a) :b (homogenize b)
     :color color
     :opacity (coerce opacity 'double-float)
-    :round-corners round-corners))
+    :round-corners (or round-corners 0.0)))
 
 (defmethod print-object ((o rectangle) s)
   (print-unreadable-object (o s :type t :identity nil)
@@ -158,9 +153,9 @@
     0))
 
 (defmethod ntransform ((rectangle rectangle) transformation)
-  (ntransform (a rectangle))
-  (ntransform (b rectangle))
-  (callf (round-corners rectangle) #'ntransform)
+  (ntransform (a rectangle) transformation)
+  (ntransform (b rectangle) transformation)
+  (zapf (round-corners rectangle) (ntransform % transformation))
   rectangle)
 
 
@@ -182,8 +177,8 @@
             (radius o))))
 
 (defmethod ntransform ((circle circle) transformation)
-  (ntransform (center circle))
-  (callf (radius circle) #'ntransform)
+  (ntransform (center circle) transformation)
+  (zapf (radius circle) (ntransform % transformation))
   circle)
 
 
@@ -203,7 +198,7 @@
             (vy (location o)))))
 
 (defmethod ntransform ((point point) transformation)
-  (ntransform (location point))
+  (ntransform (location point) transformation)
   point)
 
 
@@ -231,8 +226,8 @@
             (vy (pos o)))))
 
 (defmethod ntransform ((text text) transformation)
-  (ntransform (pos text))
-  (callf (size text) #'ntransform)
+  (ntransform (pos text) transformation)
+  (zapf (size text) (ntransform % transformation))
   text)
 
 
@@ -272,7 +267,7 @@
                                           :padding ,padding
                                           :background ,background)))
          (multiple-value-prog1 ,@body
-           (write-file ,canvas-symbol (full-filename ,filename ,canvas-type)))))))
+                               (write-file ,canvas-symbol (full-filename ,filename ,canvas-type)))))))
 
 
 ;;;; Usage --------------------------------------------------------------------

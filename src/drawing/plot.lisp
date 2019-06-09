@@ -6,13 +6,14 @@
 
 (defclass* plot-canvas (svg-canvas) ())
 
-(defmethod make-canvas ((type (eql :plot)) &key height width)
+(defmethod make-canvas ((type (eql :plot)) &key height width padding)
   (let ((scene (svg:make-svg-toplevel 'svg:svg-1.1-toplevel
                                       :height height :width width)))
     (make-instance 'plot-canvas
       :height height
       :width width
-      :scene scene)))
+      :scene scene
+      :padding padding)))
 
 (defmethod file-extension ((type (eql :plot)))
   "svg")

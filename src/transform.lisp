@@ -21,6 +21,17 @@
            0 0 1)
       m))
 
+(defun place (m corner1 corner2 &key (padding 0.0))
+  (let* ((fw (abs (- (vx corner1) (vx corner2))))
+         (fh (abs (- (vy corner1) (vy corner2))))
+         (pw (* padding fw))
+         (ph (* padding fh))
+         (w (- fw pw pw))
+         (h (- fh ph ph))
+         (x (+ (min (vx corner1) (vx corner2)) pw))
+         (y (+ (min (vy corner1) (vy corner2)) ph)))
+    (translate (scale m w h) x y)))
+
 
 (defmacro transformation (&rest transforms)
   `(-<> (id)

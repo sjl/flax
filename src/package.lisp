@@ -25,6 +25,7 @@
     :transformation
     :scale
     :rotate
+    :place
     :translate
     :ntransform))
 
@@ -90,3 +91,9 @@
   (:export :loom))
 
 
+(defpackage :flax.scratch
+  (:use :cl :iterate :losh :flax.base :flax.quickutils
+    :flax.colors
+    :flax.transform
+    :3d-vectors)
+  (:export))
