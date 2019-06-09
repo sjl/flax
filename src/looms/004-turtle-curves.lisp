@@ -79,7 +79,7 @@
 
 (defun find-bounds (paths)
   (iterate (for path :in paths)
-           (for (p1 p2) = (flax.drawing:points path))
+           (for ((p1) (p2)) = (flax.drawing:points path))
            (maximizing (vx p1) :into max-x)
            (maximizing (vx p2) :into max-x)
            (maximizing (vy p1) :into max-y)

@@ -82,10 +82,56 @@
 
 
 ;;;; Paths --------------------------------------------------------------------
+(defun pair-to-vec (pair)
+  (vec (car pair) (cdr pair)))
+
+(defun vec-to-pair (vec)
+  (cons (vx vec) (vy vec)))
+
+(defun reflect-control (control loc)
+  (let* ((l (pair-to-vec loc))
+         (c (pair-to-vec control))
+         (cv (v- c l)))
+    (vec-to-pair (v+ l (v- cv)))))
+
+(defun fill-missing-control-points (points)
+  (iterate
+    ;; Unfortunately cl-vectors doesn't seem to have anything like the nice
+    ;; convenient omit-the-starting-control-point-for-a-smooth-curve feature of
+    ;; SVG, so we'll have to implement it ourselves.
+    (with previous-ctrl2)
+    (for point :in points)
+    (for (p ctrl1 ctrl2) = point)
+    (for previous-p :previous p)
+    (cond
+      (ctrl2 (collect point))
+      (ctrl1 (psetf ctrl1 (reflect-control previous-ctrl2 previous-p)
+                    ctrl2 ctrl1)
+             (collect (list p ctrl1 ctrl2)))
+      (t (collect point)))
+    (setf previous-ctrl2 ctrl2)))
+
+(defun convert-point (canvas point)
+  (destructuring-bind (x . y) (coord-to-pair canvas point)
+    (paths:make-point x y)))
+
+(defun convert-points (canvas points)
+  (mapcar-curried #'convert-point canvas points))
+
+(defun make-vector-path (points)
+  (destructuring-bind (first-point &rest remaining-points) points
+    (let ((p (paths:create-path :open-polyline)))
+      (paths:path-reset p (first first-point))
+      (dolist (next-point remaining-points)
+        (destructuring-bind (loc &rest control-points) next-point
+          (paths:path-extend p (paths:make-bezier-curve control-points) loc)))
+      p)))
+
 (defmethod draw ((canvas png-canvas) (p path))
   (-<> (points p)
-    (mapcar (curry #'coord-to-pair canvas) <>)
-    paths:make-simple-path
+    (mapcar-curried #'convert-points canvas <>)
+    fill-missing-control-points
+    make-vector-path
     (paths:stroke-path <> 1)
     (vectors:update-state (state canvas) <>)))
 

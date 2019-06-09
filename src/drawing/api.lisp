@@ -66,6 +66,9 @@
   (with-coordinates canvas ((x y c))
     (cons x y)))
 
+(defun coords-to-pairs (canvas cs)
+  (loop :for c :in cs :collect (coord-to-pair canvas c)))
+
 
 ;;;; Drawables ----------------------------------------------------------------
 (defclass* drawable ()
@@ -79,20 +82,29 @@
 (defclass* path (drawable)
   ((points :type list)))
 
+(defun normalize-point (point)
+  (if (listp point)
+    point
+    (list point)))
+
+(defun normalize-points (points)
+  (mapcar #'normalize-point points))
+
 (defun path (points &key (opacity 1.0d0) (color *black*))
   (make-instance 'path
-    :points (mapcar #'homogenize points)
+    :points (mapcar-curried #'mapcar #'homogenize (normalize-points points))
     :color color
     :opacity (coerce opacity 'double-float)))
 
 (defmethod print-object ((o path) s)
   (print-unreadable-object (o s :type t :identity nil)
     (format s "~{~A~^ -> ~}"
-            (mapcar #'coord-to-string (points o)))))
+            (mapcar (compose #'coord-to-string #'first) (points o)))))
 
 (defmethod ntransform ((path path) transformation)
-  (dolist (p (points path))
-    (ntransform p transformation))
+  (dolist (ps (points path))
+    (dolist (p ps)
+      (ntransform p transformation)))
   path)
 
 
@@ -243,7 +255,7 @@
 (defgeneric render-object (canvas object))
 
 (defun render (canvas objects)
-  (map nil (curry #'render-object canvas) objects))
+  (map-curried #'render-object canvas objects))
 
 
 ;;;; File Writing -------------------------------------------------------------

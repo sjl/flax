@@ -77,15 +77,31 @@
 
 
 ;;;; Paths --------------------------------------------------------------------
+(defun points-to-pairs (canvas points)
+  (loop :for ps :in points :collect (coords-to-pairs canvas ps)))
+
+(defun process-path-point (path point &optional first)
+  (destructuring-bind (loc &optional ctrl1 ctrl2) point
+    (cond
+      (first (svg:with-path path
+               (svg:move-to (car loc) (cdr loc))))
+      (ctrl2 (svg:with-path path
+               (svg:curve-to (car ctrl1) (cdr ctrl1)
+                             (car ctrl2) (cdr ctrl2)
+                             (car loc) (cdr loc))))
+      (ctrl1 (svg:with-path path
+               (svg:smooth-curve-to (car ctrl1) (cdr ctrl1)
+                                    (car loc) (cdr loc))))
+      (t (svg:with-path path
+           (svg:line-to (car loc) (cdr loc)))))))
+
 (defun make-svg-path-data (canvas points)
   (destructuring-bind (first-point &rest remaining-points)
-      (mapcar (curry #'coord-to-pair canvas) points)
+      (points-to-pairs canvas points)
     (let ((p (svg:make-path)))
-      (svg:with-path p
-        (svg:move-to (car first-point) (cdr first-point)))
-      (dolist (point remaining-points)
-        (svg:with-path p
-          (svg:line-to (car point) (cdr point))))
+      (process-path-point p first-point t)
+      (loop :for next-point :in remaining-points
+            :do (process-path-point p next-point))
       p)))
 
 (defmethod draw ((canvas svg-canvas) (path path))

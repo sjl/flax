@@ -21,8 +21,8 @@
 
 (defmethod draw ((canvas plot-canvas) (p point))
   (svg:draw (scene canvas)
-            (:path :d (make-svg-path-data canvas (list (location p)
-                                                       (location p)))
+            (:path :d (make-svg-path-data canvas (list (list (location p)
+                                                             (location p))))
              :stroke-linecap "round"
              :fill "none"
              :stroke (web-color (color p))

@@ -17,6 +17,7 @@
   (check interactive #'flax.looms.004-turtle-curves:loom)
   (check interactive #'flax.looms.005-simple-triangulations:loom)
   (check interactive #'flax.looms.006-tracing-lines:loom)
-  (check interactive #'flax.looms.007-stipple:loom))
+  (check interactive #'flax.looms.007-stipple:loom)
+  (losh:pr 'ok))
 
 (check-all)

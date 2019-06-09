@@ -7,7 +7,9 @@
     :with-seed
     :random-or
     :randomly-initialize
-    :round-to))
+    :round-to
+    :map-curried
+    :mapcar-curried))
 
 (defpackage :flax.colors
   (:use :cl :iterate :losh :flax.base :flax.quickutils)

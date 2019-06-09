@@ -36,3 +36,12 @@
   "
   (* precision (round number precision)))
 
+
+;;;; Utils --------------------------------------------------------------------
+(defun map-curried (function param sequence)
+  (loop :for x :in sequence
+        :do (funcall function param x)))
+
+(defun mapcar-curried (function param sequence)
+  (loop :for x :in sequence
+        :collect (funcall function param x)))
