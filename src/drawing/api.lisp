@@ -178,7 +178,15 @@
 
 (defmethod ntransform ((circle circle) transformation)
   (ntransform (center circle) transformation)
-  (zapf (radius circle) (ntransform % transformation))
+  ;; For non-aspect-ratio-preserving transformations, we want to keep circles
+  ;; as circles, but ensure they fit within the new bounding box.  So we take
+  ;; the smaller of the two possible radius transformations.
+  (let ((a (vec 0 0 1))
+        (b (vec 1 1 1)))
+    (ntransform a transformation)
+    (ntransform b transformation)
+    (let ((c (v- a b)))
+      (mulf (radius circle) (min (abs (vx c)) (abs (vy c))))))
   circle)
 
 
