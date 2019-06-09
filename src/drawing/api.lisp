@@ -222,32 +222,97 @@
   point)
 
 
-;;;; Text ---------------------------------------------------------------------
-(defclass* text (drawable)
+;;;; Glyph --------------------------------------------------------------------
+(defclass* glyph (drawable)
   ((pos :type vec3)
-   (font :type string)
-   (size :type single-float)
-   (align :type keyword)
-   (content :type string)))
+   (width :type single-float)
+   (ch :type character)
+   (paths :type list)))
 
-(defun text (position size font content
-             &key (opacity 1.0d0) (color *black*) (align :left))
-  (make-instance 'text
-    :pos (homogenize position) :size size :font font :content content
-    :align align
+(defun glyph (position width character &key (opacity 1.0d0) (color *black*))
+  (make-instance 'glyph
+    :pos (homogenize position)
+    :width (coerce width 'single-float)
+    :ch character
     :color color
     :opacity (coerce opacity 'double-float)))
 
+(defun recompute-glyph-paths (glyph)
+  (let ((paths (letter-paths (ch glyph)))
+        (size (* 2 (width glyph))))
+    (ntransform paths (transformation
+                        (scale size size)
+                        (translate (vx (pos glyph))
+                                   (vy (pos glyph)))))
+    (setf (paths glyph) paths)))
+
+(defmethod initialize-instance :after ((glyph glyph) &key)
+  (recompute-glyph-paths glyph))
+
+(defmethod print-object ((o glyph) s)
+  (print-unreadable-object (o s :type t :identity nil)
+    (format s "~A ~A" (ch o) (pos o))))
+
+(defmethod ntransform ((glyph glyph) transformation)
+  (ntransform (pos glyph) transformation)
+  (ntransformf (width glyph) transformation)
+  (ntransformf (paths glyph) transformation)
+  ;; (recompute-glyph-paths glyph)
+  glyph)
+
+(defmethod draw (canvas (glyph glyph))
+  (map-curried #'draw canvas (paths glyph)))
+
+
+;;;; Text ---------------------------------------------------------------------
+(defclass* text (drawable)
+  ((pos :type vec3)
+   (letter-width :type single-float)
+   (letter-spacing :type single-float)
+   (content :type string)
+   (glyphs :type list)))
+
+(defun rebuild-glyphs (text)
+  (setf (glyphs text)
+        (iterate
+          (with pos = (pos text))
+          (with y = (vy (pos text)))
+          (with space = (+ (letter-width text) (letter-spacing text)))
+          (with scale = (/ (letter-width text) 0.5))
+          (for ch :in-string (content text))
+          (for pch :previous ch)
+          (for x :from (vx pos) :by space)
+          (incf x (* (kern pch ch) scale))
+          (collect (glyph (vec x y) (letter-width text) ch
+                          :opacity (opacity text)
+                          :color (color text))))))
+
+(defun text (position letter-width content &key (letter-spacing 0.0) (opacity 1.0d0) (color *black*))
+  (make-instance 'text
+    :pos (homogenize position)
+    :letter-width (coerce letter-width 'single-float)
+    :letter-spacing (coerce letter-spacing 'single-float)
+    :content content
+    :color color
+    :opacity (coerce opacity 'double-float)))
+
+(defmethod initialize-instance :after ((text text) &key)
+  (rebuild-glyphs text))
+
+
 (defmethod print-object ((o text) s)
   (print-unreadable-object (o s :type t :identity nil)
-    (format s "~S (~D, ~D)"
+    (format s "~S ~A"
             (content o)
-            (vx (pos o))
-            (vy (pos o)))))
+            (pos o))))
+
+(defmethod draw (canvas (text text))
+  (map-curried #'draw canvas (glyphs text)))
 
 (defmethod ntransform ((text text) transformation)
   (ntransform (pos text) transformation)
-  (zapf (size text) (ntransform % transformation))
+  (ntransformf (letter-width text) transformation)
+  (rebuild-glyphs text)
   text)
 
 

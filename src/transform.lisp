@@ -59,3 +59,7 @@
 (defmethod ntransform ((sequence sequence) transformation)
   (map-into sequence (rcurry #'ntransform transformation) sequence))
 
+
+(defmacro ntransformf (place transformation)
+  ;; im lazy
+  `(setf ,place (ntransform ,place ,transformation)))

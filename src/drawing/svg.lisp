@@ -61,21 +61,6 @@
                               :fill-opacity (opacity p)))))
 
 
-;;;; Text ---------------------------------------------------------------------
-(defmethod draw ((canvas svg-canvas) (text text))
-  (with-coordinates canvas
-      ((x y (pos text))
-       (size (size text)))
-    (svg:text (scene canvas)
-              (:x x :y y
-               :font-size size
-               :font-family (font text)
-               :text-anchor (string-downcase (align text)) ; dammit inkscape
-               :fill (web-color (color text))
-               :fill-opacity (opacity text))
-              (content text))))
-
-
 ;;;; Paths --------------------------------------------------------------------
 (defun points-to-pairs (canvas points)
   (loop :for ps :in points :collect (coords-to-pairs canvas ps)))

@@ -29,7 +29,8 @@
     :rotate
     :place
     :translate
-    :ntransform))
+    :ntransform
+    :ntransformf))
 
 (defpackage :flax.drawing
   (:use :cl :iterate :losh :flax.base :flax.quickutils
@@ -47,7 +48,8 @@
     :rectangle
     :point
     :circle
-    :text))
+    :text
+    :glyph))
 
 
 (defpackage :flax.looms.001-triangles

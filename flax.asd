@@ -33,7 +33,8 @@
      (:file "colors")
      (:file "transform")
      (:module "drawing" :serial t
-      :components ((:file "api")
+      :components ((:file "letters")
+                   (:file "api")
                    (:file "png")
                    (:file "svg")
                    (:file "plot")))
