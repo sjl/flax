@@ -125,5 +125,5 @@
         (flax.drawing:render canvas _))
       (values shapes))))
 
-(time (loom 11 "out" :svg 800 800))
-(time (loom 112 "out" :png 800 800 :ratio 4000000))
+;; (time (loom 11 "out" :svg 800 800))
+;; (time (loom 112 "out" :png 800 800 :ratio 4000000))
