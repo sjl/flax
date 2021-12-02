@@ -51,7 +51,7 @@
 
 (defun generate-universe-even (depth &aux (triangles (initial-triangles)))
   (do-repeat depth
-    (zapf triangles (mappend #'split-triangle-evenly %)))
+    (zapf triangles (alexandria:mappend #'split-triangle-evenly %)))
   triangles)
 
 
@@ -69,10 +69,10 @@
 
 (defun split-triangle-self-balancing (triangle)
   (destructuring-bind (a b c) (find-longest-side triangle)
-    (let ((p (-<> (random-gaussian 0.5 0.1 #'rand)
-               (clamp 0.3 0.7 <>)
-               (round-to <> 1/100)
-               (vlerp b c <>))))
+    (let ((p (_ (random-gaussian 0.5 0.1 #'rand)
+               (clamp 0.3 0.7 _)
+               (round-to _ 1/100)
+               (vlerp b c _))))
       (list (triangle p b a)
             (triangle p a c)))))
 
@@ -100,11 +100,12 @@
     (randomly-initialize ((depth (random-range-inclusive 14 19 #'rand))))
     (flax.drawing:with-rendering (canvas filetype filename width height))
     (progn
-      (-<> (generate-universe-balancing depth)
+      (_ (generate-universe-balancing depth)
         convert
-        (flax.drawing:render canvas <>))
+        (flax.drawing:render canvas _))
       (values depth))))
 
 
 ;; (declaim (optimize (speed 1)))
-;; (time (loom nil "out" :svg 800 800 :depth 16))
+
+;; (time (loom nil "out" :png 800 800 :depth 16))

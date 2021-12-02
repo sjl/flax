@@ -22,9 +22,7 @@
   :serial t
   :components
   ((:module "vendor" :serial t
-    :components ((:file "quickutils-package")
-                 (:file "quickutils")
-                 (:module "lofi-tri"
+    :components ((:module "lofi-tri"
                   :components ((:file "lofi.tri")))))
    (:module "src" :serial t
     :components

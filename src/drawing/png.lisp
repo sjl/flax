@@ -60,8 +60,8 @@
       ((ax ay (a rect))
        (bx by (b rect))
        (r (round-corners rect)))
-    (-<> (paths:make-rectangle-path ax ay bx by :round r)
-      (vectors:update-state (state canvas) <>))))
+    (_ (paths:make-rectangle-path ax ay bx by :round r)
+      (vectors:update-state (state canvas) _))))
 
 
 ;;;; Circles ------------------------------------------------------------------
@@ -69,16 +69,16 @@
   (with-coordinates canvas
       ((x y (center circ))
        (r (radius circ)))
-    (-<> (paths:make-circle-path x y r)
-      (vectors:update-state (state canvas) <>))))
+    (_ (paths:make-circle-path x y r)
+      (vectors:update-state (state canvas) _))))
 
 
 ;;;; Points -------------------------------------------------------------------
 (defmethod draw ((canvas png-canvas) (p point))
   (with-coordinates canvas
       ((x y (location p)))
-    (-<> (paths:make-circle-path x y 2)
-      (vectors:update-state (state canvas) <>))))
+    (_ (paths:make-circle-path x y 2)
+      (vectors:update-state (state canvas) _))))
 
 
 ;;;; Paths --------------------------------------------------------------------
@@ -128,12 +128,12 @@
       p)))
 
 (defmethod draw ((canvas png-canvas) (p path))
-  (-<> (points p)
-    (mapcar-curried #'convert-points canvas <>)
+  (_ (points p)
+    (mapcar-curried #'convert-points canvas _)
     fill-missing-control-points
     make-vector-path
-    (paths:stroke-path <> 1)
-    (vectors:update-state (state canvas) <>)))
+    (paths:stroke-path _ 1)
+    (vectors:update-state (state canvas) _)))
 
 
 ;;;; Triangles ----------------------------------------------------------------
@@ -142,13 +142,13 @@
       ((ax ay (a tri))
        (bx by (b tri))
        (cx cy (c tri)))
-    (-<> (list (cons ax ay)
+    (_ (list (cons ax ay)
                (cons bx by)
                (cons cx cy)
                (cons ax ay))
       paths:make-simple-path
-      (paths:stroke-path <> 1)
-      (vectors:update-state (state canvas) <>))))
+      (paths:stroke-path _ 1)
+      (vectors:update-state (state canvas) _))))
 
 
 ;;;; Rendering ----------------------------------------------------------------

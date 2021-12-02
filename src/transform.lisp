@@ -34,9 +34,9 @@
 
 
 (defmacro transformation (&rest transforms)
-  `(-<> (id)
+  `(_ (id)
      ,@(iterate (for (name . body) :in transforms)
-                (collect `(,name <> ,@body)))))
+                (collect `(,name _ ,@body)))))
 
 
 (defgeneric ntransform (object transformation))

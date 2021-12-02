@@ -119,11 +119,11 @@
     (randomly-initialize
       ((shapes (clamp 1 100 (random-gaussian-integer 6 2 #'rand)))))
     (progn
-      (-<> (gen shapes)
-        (stipple <> (/ (or ratio 100000) shapes))
+      (_ (gen shapes)
+        (stipple _ (/ (or ratio 100000) shapes))
         convert
-        (flax.drawing:render canvas <>))
+        (flax.drawing:render canvas _))
       (values shapes))))
 
-;; (time (loom 11 "out" :svg 800 800))
-;; (time (loom 112 "out" :png 800 800 :ratio 4000000))
+(time (loom 11 "out" :svg 800 800))
+(time (loom 112 "out" :png 800 800 :ratio 4000000))

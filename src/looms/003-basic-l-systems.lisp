@@ -21,7 +21,8 @@
       (funcall callback iteration word))
     (if (= iterations iteration)
       word
-      (recur (funcall mutate (mappend (rcurry #'gethash (productions lsystem)) word))
+      (recur (funcall mutate (alexandria:mappend
+                               (rcurry #'gethash (productions lsystem)) word))
              (1+ iteration)))))
 
 (defmacro define-lsystem (name axiom &rest productions)

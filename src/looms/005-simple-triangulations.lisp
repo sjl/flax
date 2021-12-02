@@ -64,9 +64,9 @@
                 (random-range 0.05 0.2 #'rand)))
        (points (round-to (random-range-inclusive 100 1000 #'rand) 10))))
     (progn
-      (-<> (generate generator points)
-        (convert <> ratio)
-        (flax.drawing:render canvas <>))
+      (_ (generate generator points)
+        (convert _ ratio)
+        (flax.drawing:render canvas _))
       (values generator-name points ratio))))
 
 

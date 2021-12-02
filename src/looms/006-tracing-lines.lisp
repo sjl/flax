@@ -62,9 +62,9 @@
        (lines (round-to (random-range 80 140 #'rand) 10))))
     (let ((*spread-y* (/ 0.15 lines))))
     (progn
-      (-<> (generate-lines points lines)
+      (_ (generate-lines points lines)
         convert-lines
-        (flax.drawing:render canvas <>))
+        (flax.drawing:render canvas _))
       (values lines points))))
 
 ;; (time (loom 4 "out" :svg 800 800))

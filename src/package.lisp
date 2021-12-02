@@ -1,5 +1,5 @@
 (defpackage :flax.base
-  (:use :cl :iterate :losh :flax.quickutils
+  (:use :cl :iterate :losh
         :3d-vectors
         :3d-matrices)
   (:export
@@ -12,7 +12,7 @@
     :mapcar-curried))
 
 (defpackage :flax.colors
-  (:use :cl :iterate :losh :flax.base :flax.quickutils)
+  (:use :cl :iterate :losh :flax.base)
   (:export
     :color
     :with-color
@@ -20,7 +20,7 @@
     :rgb))
 
 (defpackage :flax.transform
-  (:use :cl :iterate :losh :flax.base :flax.quickutils
+  (:use :cl :iterate :losh :flax.base
     :3d-vectors
     :3d-matrices)
   (:export
@@ -33,7 +33,7 @@
     :ntransformf))
 
 (defpackage :flax.drawing
-  (:use :cl :iterate :losh :flax.base :flax.quickutils
+  (:use :cl :iterate :losh :flax.base
     :flax.colors
     :flax.transform
     :3d-vectors
@@ -53,50 +53,50 @@
 
 
 (defpackage :flax.looms.001-triangles
-  (:use :cl :iterate :losh :flax.base :flax.quickutils
+  (:use :cl :iterate :losh :flax.base
     :3d-vectors)
   (:export :loom))
 
 (defpackage :flax.looms.002-wobbly-lines
-  (:use :cl :iterate :losh :flax.base :flax.quickutils
+  (:use :cl :iterate :losh :flax.base
     :flax.colors
     :3d-vectors)
   (:export :loom))
 
 (defpackage :flax.looms.003-basic-l-systems
-  (:use :cl :iterate :losh :flax.base :flax.quickutils
+  (:use :cl :iterate :losh :flax.base
     :flax.colors
     :3d-vectors)
   (:export :loom))
 
 (defpackage :flax.looms.004-turtle-curves
-  (:use :cl :iterate :losh :flax.base :flax.quickutils
+  (:use :cl :iterate :losh :flax.base
     :flax.colors
     :flax.transform
     :3d-vectors)
   (:export :loom))
 
 (defpackage :flax.looms.005-simple-triangulations
-  (:use :cl :iterate :losh :flax.base :flax.quickutils
+  (:use :cl :iterate :losh :flax.base
     :flax.colors
     :3d-vectors)
   (:export :loom))
 
 (defpackage :flax.looms.006-tracing-lines
-  (:use :cl :iterate :losh :flax.base :flax.quickutils
+  (:use :cl :iterate :losh :flax.base
     :flax.colors
     :3d-vectors)
  (:export :loom))
 
 (defpackage :flax.looms.007-stipple
-  (:use :cl :iterate :losh :flax.base :flax.quickutils
+  (:use :cl :iterate :losh :flax.base
     :flax.colors
     :3d-vectors)
   (:export :loom))
 
 
 (defpackage :flax.scratch
-  (:use :cl :iterate :losh :flax.base :flax.quickutils
+  (:use :cl :iterate :losh :flax.base
     :flax.colors
     :flax.transform
     :3d-vectors)

@@ -121,9 +121,9 @@
 
 ;;;; L-Systems ----------------------------------------------------------------
 (defun expand (word productions)
-  (mappend (lambda (letter)
-             (ensure-list (or (getf productions letter) letter)))
-           word))
+  (alexandria:mappend (lambda (letter)
+                        (ensure-list (or (getf productions letter) letter)))
+                      word))
 
 (defun run-l-system (axiom productions iterations)
   (iterate
@@ -398,11 +398,12 @@
     (flax.drawing:with-rendering
         (canvas filetype filename width height :background bg :padding 0.05))
     (progn
-      (-<> (run-l-system axiom productions iterations)
+      (_ (run-l-system axiom productions iterations)
         turtle-draw
         transform-to-fit
-        (flax.drawing:render canvas <>))
+        (flax.drawing:render canvas _))
       (values (name l-system)
               iterations
               mutagen))))
 
+;; (time (loom 1 "out" :svg 500 500))
